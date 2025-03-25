@@ -173,7 +173,77 @@ nav .right a span {
 .projects-details .group .text {
     flex: 8;
 }
-/*Section IV: Contact */
+/* Section IV: Certs */
+.certs-section {
+    padding: 0 50px;
+    margin-bottom: 100px;
+}
+.certs-section h2 {
+    text-align: left;
+    font-size: 35px;
+}
+.certs-section h3 {
+    font-weight: bold;
+}
+.certs-section .text {
+    text-align: center;
+    margin-bottom: 35px;
+}
+.certs-section .cells {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+.certs-section .cells .cell {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+
+    width: 200px;
+    padding: 10px 20px;
+    margin: 10px;
+    border: 1.5px solid #d3d3d3;
+    border-radius: 5px;
+}
+.certs-section .cells .cell img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    border-radius: 2px;
+}
+.certs-section .cells .cell span {
+    font-size: 18px;
+}
+.certs-section .cells .cell:hover {
+    background-color: #f4f6f9;
+    border-color: #4a76ee;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+.certs-section .cells .cell a:hover i,
+.certs-section .cells .cell a:hover span {
+    color: #4a76ee;
+}
+.certs-section .cells .cell a {
+    color: var(--text-color);
+    text-decoration: none; 
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.certs-section .cells .cell a:hover {
+    color: var(--link-color);
+}
+.cisco-color {
+    color: #00A9E0;
+    font-weight: bold;
+}
+.standard-strong {
+    color: black;
+    font-weight: bold;
+}
+/*Section V: Contact */
 .contact-section {
     padding: 0 50px;
     margin-bottom: 100px;
@@ -283,7 +353,11 @@ to the device's requirements.*/
    .projects-section {
     padding:0 20px;
    }
-   /*Section IV: Contact */
+   /*Section IV: Certs*/
+   .certs-section {
+    padding: 0 20px;
+   }
+   /*Section V: Contact */
    .contact-section {
     padding: 0 20px;
     margin-bottom: 100px;
