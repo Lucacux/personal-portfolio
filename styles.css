@@ -243,6 +243,9 @@ nav .right a span {
     color: black;
     font-weight: bold;
 }
+.hardware-networks-header {
+    margin-top: 20px;
+}
 /*Section V: Contact */
 .contact-section {
     padding: 0 50px;
