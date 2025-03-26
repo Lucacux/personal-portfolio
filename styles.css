@@ -246,6 +246,9 @@ nav .right a span {
 .hardware-networks-header {
     margin-top: 20px;
 }
+.programming-header {
+    margin-top: 15px;
+}
 /*Section V: Contact */
 .contact-section {
     padding: 0 50px;
