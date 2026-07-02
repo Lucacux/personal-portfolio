@@ -61,6 +61,9 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
     <canvas class="cmatrix-canvas" id="cmatrix-canvas"></canvas>
     <div class="cmatrix-exit-hint" id="cmatrix-exit-hint">Press Ctrl+C to exit</div>
   </div>
+  <input class="term-input" id="term-input" type="text" inputmode="text"
+    autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+    aria-label="Terminal input" tabindex="-1" />
 </div>
 
 <style>
@@ -85,6 +88,7 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
     border: 1px solid var(--t-border);
     border-radius: 8px;
     overflow: hidden;
+    position: relative;
     box-shadow: 0 24px 48px -16px rgba(0,0,0,0.18);
     font-family: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
     font-size: 13px;
@@ -257,6 +261,18 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
     .term-prompt-line { padding: 6px 12px 8px; font-size: 11.5px; }
     .term-hint { font-size: 10px; margin-top: 8px; }
   }
+  /* Hidden input: lets mobile keyboards open when the terminal is tapped */
+  .term-input {
+    position: absolute;
+    left: 12px; bottom: 10px;
+    width: 1px; height: 1px;
+    opacity: 0;
+    border: 0; padding: 0; margin: 0;
+    background: transparent; color: transparent;
+    font-size: 16px; /* >=16px stops iOS from zooming on focus */
+    caret-color: transparent;
+  }
+  .term-stage { cursor: text; }
 </style>
 
 <script is:inline>
@@ -438,43 +454,59 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
     typedText.textContent = "";
   }
 
-  card.addEventListener("keydown", function (e) {
-    if (running) {
-      if (e.ctrlKey && e.key === "c") {
-        e.preventDefault();
-        stopAll();
-      }
-      return;
-    }
-    // Execute the typed command ONLY on Enter (like a real shell)
-    if (e.key === "Enter") {
-      e.preventDefault();
-      var cmd = typed.trim();
-      if (cmd === "cmatrix") { startMatrix(); }
-      else if (cmd === "tux-rain") { startTuxRain(); }
-      else {
-        // Unknown command: brief feedback, then clear the line
-        if (cmd.length) {
-          typedText.textContent = typed;
-        }
-      }
-      typed = "";
-      typedText.textContent = "";
-      return;
-    }
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      typed = typed.slice(0, -1);
+  var input = document.getElementById("term-input");
+
+  function focusInput() {
+    if (!input) return;
+    try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+  }
+
+  function runCommand(cmd) {
+    cmd = (cmd || "").trim().toLowerCase();
+    if (cmd === "cmatrix") { startMatrix(); }
+    else if (cmd === "tux-rain") { startTuxRain(); }
+    typed = "";
+    if (input) input.value = "";
+    typedText.textContent = "";
+  }
+
+  // Tap/click the terminal: if animating, stop it (mobile-friendly exit);
+  // otherwise focus the hidden input so the mobile keyboard opens.
+  card.addEventListener("click", function () {
+    if (running) { stopAll(); if (input) input.value = ""; return; }
+    focusInput();
+  });
+
+  if (input) {
+    // Mobile keyboards fire reliable "input" events even when keydown is flaky.
+    input.addEventListener("input", function () {
+      if (running) { input.value = ""; return; }
+      typed = input.value;
       typedText.textContent = typed;
+    });
+    input.addEventListener("keydown", function (e) {
+      if (running) {
+        if (e.ctrlKey && (e.key === "c" || e.key === "C")) { e.preventDefault(); stopAll(); input.value = ""; }
+        return;
+      }
+      if (e.key === "Enter") { e.preventDefault(); runCommand(input.value); }
+    });
+  }
+
+  // Desktop: physical keyboard typing while the card itself is focused.
+  card.addEventListener("keydown", function (e) {
+    if (document.activeElement === input) return; // input handler already covers this
+    if (running) {
+      if (e.ctrlKey && e.key === "c") { e.preventDefault(); stopAll(); }
       return;
     }
+    if (e.key === "Enter") { e.preventDefault(); runCommand(typed); return; }
+    if (e.key === "Backspace") { e.preventDefault(); typed = typed.slice(0, -1); typedText.textContent = typed; return; }
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
       typed += e.key;
       typedText.textContent = typed;
     }
   });
-
-  card.addEventListener("click", function () { card.focus(); });
 })();
 </script>
