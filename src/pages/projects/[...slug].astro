@@ -1,0 +1,761 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Nav from "../../components/Nav.astro";
+import Footer from "../../components/Footer.astro";
+import { homelabTimeline } from "../../data/homelabTimeline.ts";
+import { openwrtTimeline } from "../../data/openwrtTimeline.ts";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("projects");
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+// Map project tags → their logo files (so tags show logo + label).
+const logoModules = import.meta.glob("../../images/*", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+function imgUrl(filename: string) {
+  const match = Object.entries(logoModules).find(([path]) => path.endsWith("/" + filename));
+  return match?.[1];
+}
+const tagLogos: Record<string, string | undefined> = {
+  "Peppermint": imgUrl("peppermint-logo.svg"),
+  "Ubuntu": imgUrl("ubuntu-original.svg"),
+  "Debian": imgUrl("debian-original.svg"),
+  "Arch Linux": imgUrl("archlinux-original.svg"),
+  "Samba": imgUrl("samba-logo.svg"),
+  "Cloudflare Tunnel": imgUrl("Cloudflare_Logo.svg"),
+  "SSH": imgUrl("ssh-logo.svg"),
+  "Docker": imgUrl("docker-original.svg"),
+  "Jellyfin": imgUrl("jellyfin-logo.svg"),
+  "OpenWrt": imgUrl("OpenWrt_Logo.svg"),
+  "Firewall": imgUrl("firewall.svg"),
+};
+
+const all = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+const idx = all.findIndex((p) => p.id === entry.id);
+const prev = idx > 0 ? all[idx - 1] : null;
+
+// The homelab and OpenWrt projects render as a visual timeline instead of plain prose.
+const timelines: Record<string, typeof homelabTimeline> = {
+  homelab: homelabTimeline,
+  openwrt: openwrtTimeline,
+};
+const useTimeline = entry.id in timelines;
+const timeline = timelines[entry.id] ?? [];
+
+// Cloudflared explainer drawer (roadmap.sh-style) — only on the homelab case study.
+const docModules = import.meta.glob("../../documentacion-cloudflared/*.svg", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+function docUrl(filename: string) {
+  const match = Object.entries(docModules).find(([path]) => path.endsWith("/" + filename));
+  return match?.[1];
+}
+// Resolve a diagram from either the documentacion folder or the images folder.
+function diagramUrl(filename: string) {
+  return docUrl(filename) ?? imgUrl(filename);
+}
+const cfDiagram = docUrl("how-cloudflared-works.svg");
+const cgnatDiagram = diagramUrl("CGNAT-explanation.svg");
+const showCfDrawer = entry.id === "homelab";
+// DoH explainer drawer (OpenWrt case study) — three-step visual comparison.
+const showDohDrawer = entry.id === "openwrt";
+const stdDnsDiagram = diagramUrl("Standard-DNS-Request.svg");
+const dohReqDiagram = diagramUrl("DoH-Request.svg");
+const dohIspDiagram = diagramUrl("Doh-ISP-perspective.svg");
+const dohRepoUrl = "https://github.com/Lucacux/DNS-OVER-HTTPS-OpenWRT";
+// Icon for the DoH drawer badge.
+const dnsIcon = imgUrl("dns.svg");
+// OpenWrt wordmark for the case-study title (light + dark variants).
+const openwrtLogo = imgUrl("OpenWrt_Logo.svg");
+const openwrtLogoDark = imgUrl("OpenWrt_Logo-dark.svg");
+// Rich network-topology diagram, shown prominently on the OpenWrt case study.
+const topologyDiagram = diagramUrl("My-Network-Topology.svg");
+// Cloudflare wordmark for the drawer badge (light + dark variants).
+const cfLogo = imgUrl("Cloudflare_Logo.svg");
+const cfLogoDark = imgUrl("Cloudflare_Logo-dark.svg");
+// Router icon for the CGNAT drawer badge.
+const routerIcon = imgUrl("router.svg");
+// Google Docs icon for the resource row.
+const gdocsIcon = imgUrl("Google_Docs_icon_(2026).svg");
+// Downloadable setup guide (served from /public, works in dev and prod). Written in Spanish.
+const cfDocUrl = "/docs/cloudflare-tunnel-ssh-guia.docx";
+function timelineImg(filename?: string) {
+  if (!filename) return undefined;
+  const match = Object.entries(logoModules).find(([path]) => path.endsWith("/" + filename));
+  return match?.[1];
+}
+const next = idx < all.length - 1 ? all[idx + 1] : null;
+---
+
+<BaseLayout title={`${entry.data.title} — Luca Lombardo`} description={entry.data.pitch}>
+  <Nav />
+  <div class="case-outer">
+    <div class="dot-pattern fade-r" style="top:90px;left:0;"></div>
+    <div class="dot-pattern fade-l" style="top:380px;right:0;"></div>
+    <div class="dot-pattern fade-r" style="top:780px;left:0;"></div>
+    <div class="dot-pattern fade-l" style="bottom:240px;right:0;"></div>
+    <main class="wrap case-study">
+    <a class="back-link" href="/#projects">← back to projects</a>
+
+    <header class="case-head">
+      <h1>
+        {entry.id === "openwrt" ? (
+          <span class="title-with-logo">
+            <img class="title-logo logo-light" src={openwrtLogo} alt="OpenWrt" />
+            <img class="title-logo logo-dark" src={openwrtLogoDark} alt="OpenWrt" />
+            <span>router lab</span>
+          </span>
+        ) : entry.data.title}
+      </h1>
+      <p class="pitch">{entry.data.pitch}</p>
+      <div class="tag-row">
+        {entry.data.tags.map((t) => (
+          <span class="tag">
+            {tagLogos[t] && <img class="tag-logo" src={tagLogos[t]} alt="" loading="lazy" />}
+            {t}
+          </span>
+        ))}
+      </div>
+      <div class="meta-row">
+        {entry.data.date && <span>{entry.data.date}</span>}
+        {entry.data.repoUrl && (
+          <a href={entry.data.repoUrl} target="_blank" rel="noopener">view repo →</a>
+        )}
+        {entry.data.liveUrl && (
+          <a href={entry.data.liveUrl} target="_blank" rel="noopener">live →</a>
+        )}
+      </div>
+    </header>
+
+    {entry.data.skills && entry.data.skills.length > 0 && (
+      <div class="skills-box">
+        <div class="skills-label">Skills practiced</div>
+        <div class="skills-row">
+          {entry.data.skills.map((s) => <span class="skill">{s}</span>)}
+        </div>
+      </div>
+    )}
+
+    {entry.id === "openwrt" && topologyDiagram && (
+      <figure class="topology-figure">
+        <img src={topologyDiagram} alt="My current home network topology: ISP router bridged to the OpenWrt gateway, VLAN-segmented servers, and the private LAN." loading="lazy" />
+        <figcaption>My current network topology, end to end.</figcaption>
+      </figure>
+    )}
+
+    {useTimeline ? (
+      <div class="timeline-wrap">
+        {timeline.map((t) => (
+          <div class="tline-item">
+            <span class={`tline-dot ${t.filled ? "filled" : ""}`}></span>
+            <div class="tline-year">{t.year}</div>
+            <h3 class="tline-title">{t.title}</h3>
+            {timelineImg(t.logo) && (
+              <div class="tline-logo">
+                <img src={timelineImg(t.logo)} alt="" loading="lazy" />
+              </div>
+            )}
+            {t.bodyHtml
+              ? <p class="tline-body" set:html={t.bodyHtml} />
+              : <p class="tline-body">{t.body}</p>}
+            {timelineImg(t.image) && (
+              <figure class="tline-figure">
+                <img src={timelineImg(t.image)} alt={t.caption || t.title} loading="lazy" />
+                {t.caption && <figcaption>{t.caption}</figcaption>}
+              </figure>
+            )}
+          </div>
+        ))}
+      </div>
+    ) : (
+      <article class="prose">
+        <Content />
+      </article>
+    )}
+
+    <nav class={`prev-next ${!next ? "solo" : ""}`}>
+      <a class="nav-btn" href="/">← Back to home</a>
+      {next && <a class="nav-btn" href={`/projects/${next.id}/`}>{next.data.title} →</a>}
+    </nav>
+    </main>
+  </div>
+
+  {showCfDrawer && (
+    <div class="cf-drawer-root" id="drawer-cf" aria-hidden="true">
+      <div class="cf-backdrop" data-drawer-close></div>
+      <aside class="cf-panel" role="dialog" aria-modal="true" aria-label="How Cloudflare Tunnel works">
+        <header class="cf-panel-head">
+          <span class="cf-badge-logo">
+            <img class="logo-light" src={cfLogo} alt="Cloudflare" />
+            <img class="logo-dark" src={cfLogoDark} alt="Cloudflare" />
+          </span>
+          <button class="cf-close" type="button" data-drawer-close aria-label="Close">✕</button>
+        </header>
+        <div class="cf-panel-body">
+          <h2 class="cf-title">How Cloudflare Tunnel works</h2>
+          <p class="cf-lead">
+            My home server sits behind CGNAT. I do have a public IP — but it's shared with many other
+            subscribers and my ISP controls its ports, so I can't open or forward inbound ports to my
+            server. Cloudflare Tunnel gets around this with a lightweight
+            <code>cloudflared</code> daemon that dials <em>out</em> from the server to Cloudflare's edge
+            and holds a persistent connection open.
+          </p>
+
+          {cfDiagram && (
+            <figure class="cf-figure">
+              <img src={cfDiagram} alt="Diagram: cloudflared dials out to Cloudflare's edge, which routes a subdomain back down the tunnel to a CGNAT-bound server." loading="lazy" />
+              <figcaption>How traffic reaches the server despite CGNAT.</figcaption>
+            </figure>
+          )}
+
+          <h3 class="cf-h3">My setup, in short</h3>
+          <p>
+            A subdomain of my own domain is routed by Cloudflare back down that tunnel to a local
+            service — no open inbound ports and no public IP required. I use it to reach the box over
+            SSH (moved off port 22, key-only authentication) and to expose selected services such as
+            Jellyfin on their own subdomains.
+          </p>
+
+          <h3 class="cf-h3">Setup guide</h3>
+          <p class="cf-note">
+            The complete step-by-step walkthrough I wrote — from creating the tunnel to the client's
+            <code>~/.ssh/config</code> — is available to download (written in Spanish):
+          </p>
+          <div class="cf-resources">
+            <div class="cf-res-head">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+              Resources
+            </div>
+            <a class="cf-res-row" href={cfDocUrl} download="Cloudflare-Tunnel-SSH-Cloudflared-guia.docx">
+              {gdocsIcon && <img class="cf-res-logo" src={gdocsIcon} alt="Document" />}
+              <span class="cf-res-text">
+                <span class="cf-res-label">Cloudflare Tunnel for SSH — full step-by-step guide</span>
+                <span class="cf-res-sub">DOCX · Español</span>
+              </span>
+              <svg class="cf-res-ext" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="cf-drawer-root" id="drawer-cgnat" aria-hidden="true">
+      <div class="cf-backdrop" data-drawer-close></div>
+      <aside class="cf-panel" role="dialog" aria-modal="true" aria-label="What is CGNAT">
+        <header class="cf-panel-head">
+          <span class="cf-badge">
+            {routerIcon && <img class="cf-badge-icon" src={routerIcon} alt="" />}
+            Networking
+          </span>
+          <button class="cf-close" type="button" data-drawer-close aria-label="Close">✕</button>
+        </header>
+        <div class="cf-panel-body">
+          <h2 class="cf-title">What is CGNAT?</h2>
+          <p class="cf-lead">
+            CGNAT (Carrier-Grade NAT) is how many ISPs stretch a limited pool of public IPv4
+            addresses across a lot of subscribers. Instead of giving each customer their own public
+            IP, the provider adds a second layer of NAT inside its own network, so many households
+            end up sharing a single public address.
+          </p>
+
+          {cgnatDiagram && (
+            <figure class="cf-figure">
+              <img src={cgnatDiagram} alt="Diagram: many subscribers sharing a single public IP behind the ISP's carrier-grade NAT." loading="lazy" />
+              <figcaption>Many subscribers behind one shared public IP.</figcaption>
+            </figure>
+          )}
+
+          <h3 class="cf-h3">Why it's a wall</h3>
+          <p>
+            You still have a public IP — but it's shared, and the ISP controls its ports. There's no
+            port on that address that maps back to just your router, so inbound connections and
+            port-forwarding simply don't work. That's why a home server can't be exposed the classic
+            way, and why an <em>outbound</em> tunnel like Cloudflare Tunnel is needed instead.
+          </p>
+        </div>
+      </aside>
+    </div>
+  )}
+
+  {showDohDrawer && (
+    <div class="cf-drawer-root" id="drawer-doh" aria-hidden="true">
+      <div class="cf-backdrop" data-drawer-close></div>
+      <aside class="cf-panel" role="dialog" aria-modal="true" aria-label="How my DNS stays private">
+        <header class="cf-panel-head">
+          <span class="cf-badge">
+            {dnsIcon && <img class="cf-badge-icon" src={dnsIcon} alt="" />}
+            DNS Privacy
+          </span>
+          <button class="cf-close" type="button" data-drawer-close aria-label="Close">✕</button>
+        </header>
+        <div class="cf-panel-body">
+          <h2 class="cf-title">How my DNS stays private</h2>
+          <p class="cf-lead">
+            By default, every "where does this domain live?" lookup leaves the network in plain text,
+            and the ISP reads all of it. My OpenWrt router runs its own DNS and forwards it upstream
+            over an encrypted channel — here's the difference, in three steps.
+          </p>
+
+          <h3 class="cf-h3">1 · Standard DNS — the ISP sees everything</h3>
+          <p>
+            A normal DNS query is sent in the clear. Even if the page itself is HTTPS, the lookup that
+            says "I'm about to visit youtube.com" travels in plaintext straight through the ISP's
+            resolver, which can log, profile, or tamper with it.
+          </p>
+          {stdDnsDiagram && (
+            <figure class="cf-figure">
+              <img src={stdDnsDiagram} alt="A plaintext DNS query for youtube.com passing readable through the ISP's DNS server." loading="lazy" />
+              <figcaption>Plaintext DNS — the ISP reads every lookup.</figcaption>
+            </figure>
+          )}
+
+          <h3 class="cf-h3">2 · DNS over HTTPS — encrypted upstream</h3>
+          <p>
+            Local devices still ask the OpenWrt router on port 53 (forced by a DNS-LOCK rule). The
+            router then resolves the query upstream to a public resolver over HTTPS on port 443 —
+            wrapped in TLS — and hands the answer back to the client on the LAN.
+          </p>
+          {dohReqDiagram && (
+            <figure class="cf-figure">
+              <img src={dohReqDiagram} alt="OpenWrt receives a local DNS query on port 53 and resolves it upstream to Cloudflare over encrypted HTTPS on port 443." loading="lazy" />
+              <figcaption>OpenWrt resolves upstream over encrypted HTTPS.</figcaption>
+            </figure>
+          )}
+
+          <h3 class="cf-h3">3 · What the ISP actually sees</h3>
+          <p>
+            From the ISP's side there's no readable query left — just a TLS session between my router
+            and the resolver, carrying opaque "Application Data". They can tell I'm talking to a DNS
+            provider, but not what I'm asking.
+          </p>
+          {dohIspDiagram && (
+            <figure class="cf-figure">
+              <img src={dohIspDiagram} alt="From the ISP's perspective, only encrypted TLS application data flows between OpenWrt and the resolver." loading="lazy" />
+              <figcaption>To the ISP, it's just encrypted TLS bytes.</figcaption>
+            </figure>
+          )}
+
+          <h3 class="cf-h3">Resources</h3>
+          <div class="cf-resources">
+            <div class="cf-res-head">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+              Resources
+            </div>
+            <a class="cf-res-row" href={dohRepoUrl} target="_blank" rel="noopener noreferrer">
+              <svg class="cf-res-gh" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-1.8c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.6 18 4.9 18 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+              <span class="cf-res-text">
+                <span class="cf-res-label">DNS-over-HTTPS on OpenWrt — config & notes</span>
+                <span class="cf-res-sub">GitHub repository</span>
+              </span>
+              <svg class="cf-res-ext" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  )}
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" type="button" aria-label="Close">✕</button>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <Footer />
+
+  <script is:inline>
+    (function () {
+      function openDrawer(root) {
+        if (!root) return;
+        root.classList.add("open");
+        root.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+      function closeAll() {
+        var open = document.querySelectorAll(".cf-drawer-root.open");
+        for (var i = 0; i < open.length; i++) {
+          open[i].classList.remove("open");
+          open[i].setAttribute("aria-hidden", "true");
+        }
+        document.body.style.overflow = "";
+      }
+      document.addEventListener("click", function (e) {
+        var trigger = e.target.closest("[data-drawer-open]");
+        if (trigger) {
+          e.preventDefault();
+          closeAll();
+          openDrawer(document.getElementById("drawer-" + trigger.getAttribute("data-drawer-open")));
+        } else if (e.target.closest("[data-drawer-close]")) {
+          closeAll();
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeAll();
+      });
+
+      // Image lightbox: click any case-study figure to view it full-screen.
+      var lb = document.getElementById("lightbox");
+      var lbImg = document.getElementById("lightbox-img");
+      function openLightbox(src, alt) {
+        if (!lb || !lbImg) return;
+        lbImg.src = src; lbImg.alt = alt || "";
+        lb.classList.add("open"); lb.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+      function closeLightbox() {
+        if (!lb) return;
+        lb.classList.remove("open"); lb.setAttribute("aria-hidden", "true");
+        lbImg.src = "";
+        if (!document.querySelector(".cf-drawer-root.open")) document.body.style.overflow = "";
+      }
+      document.addEventListener("click", function (e) {
+        var fig = e.target.closest(".tline-figure img, .topology-figure img, .cf-figure img");
+        if (fig) { openLightbox(fig.currentSrc || fig.src, fig.alt); return; }
+        if (lb && lb.classList.contains("open") && (e.target === lb || e.target === lbImg || e.target.closest(".lightbox-close"))) {
+          closeLightbox();
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeLightbox();
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .case-outer { position: relative; overflow: clip; width: 100%; }
+  .case-study { padding-top: 48px; max-width: 800px; position: relative; z-index: 1; }
+  .back-link { font-family: var(--mono); font-size: 13px; color: var(--text-muted); display: inline-block; margin-bottom: 36px; }
+  .back-link:hover { color: var(--accent); }
+
+  .case-head h1 { font-size: clamp(28px, 4vw, 42px); font-weight: 600; letter-spacing: -0.01em; margin-bottom: 14px; }
+  .title-with-logo { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .title-logo { height: 1.15em; width: auto; display: inline-block; }
+  .title-logo.logo-dark { display: none; }
+  :global([data-theme="dark"]) .title-logo.logo-light { display: none; }
+  :global([data-theme="dark"]) .title-logo.logo-dark { display: inline-block; }
+  .topology-figure { margin: 30px 0 0; }
+  .topology-figure img {
+    width: 100%; height: auto; display: block;
+    background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+  }
+  .topology-figure figcaption {
+    font-size: 13px; color: var(--text-muted); font-style: italic;
+    margin-top: 10px; text-align: center;
+  }
+  .pitch { font-size: 16px; color: var(--text-muted); max-width: 62ch; margin-bottom: 18px; }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    background: var(--accent-soft); padding: 5px 11px; border-radius: 4px;
+  }
+  .tag-logo { width: 18px; height: 18px; object-fit: contain; }
+  .meta-row { display: flex; gap: 18px; font-family: var(--mono); font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .meta-row a:hover { color: var(--accent); }
+
+  .skills-box {
+    margin: 40px 0; padding: 18px 20px; border: 1px solid var(--border);
+    border-radius: 6px; background: var(--bg-card);
+  }
+  .skills-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 10px; }
+  .skills-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .skill { font-size: 13px; padding: 5px 11px; border: 1px solid var(--border-strong); border-radius: 999px; }
+
+  /* Visual timeline (homelab) */
+  .timeline-wrap {
+    position: relative;
+    margin: 8px 0 60px;
+    padding-left: 34px;
+  }
+  .timeline-wrap::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: var(--border-strong);
+  }
+  .tline-item { position: relative; padding-bottom: 38px; }
+  .tline-item:last-child { padding-bottom: 0; }
+  .tline-dot {
+    position: absolute;
+    left: -34px;
+    top: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    box-sizing: border-box;
+  }
+  .tline-dot.filled { background: var(--accent); }
+  .tline-year {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .tline-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .tline-logo { margin: 0 0 10px; }
+  .tline-logo img {
+    height: 20px;
+    width: auto;
+    max-width: 100px;
+    object-fit: contain;
+  }
+  .tline-body {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 64ch;
+  }
+  :global(.tline-body a.tline-repo) {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .15s ease;
+  }
+  :global(.tline-body a.tline-repo .gh-mark) { width: 15px; height: 15px; flex: 0 0 auto; }
+  :global(.tline-body a.tline-repo:hover) { border-bottom-color: var(--accent); }
+  .tline-figure { margin: 18px 0 0; }
+  .tline-figure img {
+    display: block;
+    width: 100%;
+    max-width: 540px;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .tline-figure figcaption {
+    margin-top: 9px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+  @media (max-width: 480px) {
+    .timeline-wrap { padding-left: 26px; }
+    .tline-dot { left: -26px; width: 13px; height: 13px; }
+    .tline-title { font-size: 16px; }
+    .tline-body { font-size: 14px; }
+  }
+
+  .prose { padding-bottom: 60px; font-size: 16px; line-height: 1.7; }
+  .prose :global(h2) { font-size: 21px; font-weight: 600; margin: 36px 0 14px; }
+  .prose :global(p) { color: var(--text-muted); margin-bottom: 16px; }
+  .prose :global(strong) { color: var(--text); }
+  .prose :global(code) { font-family: var(--mono); background: var(--accent-soft); padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  .prose :global(ul) { color: var(--text-muted); margin: 0 0 16px; padding-left: 22px; }
+  .prose :global(li) { margin-bottom: 8px; }
+  .prose :global(li strong) { color: var(--text); font-family: var(--mono); font-size: 0.92em; }
+  /* Photos: contained width, soft styling, italic caption from the markdown emphasis below */
+  .prose :global(p:has(img)) {
+    margin: 36px 0 8px;
+    text-align: center;
+  }
+  .prose :global(img) {
+    display: block;
+    width: 100%;
+    max-width: 620px;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  /* A line of italics right after a photo becomes its caption */
+  .prose :global(p:has(img) em),
+  .prose :global(p > img + em) {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .prev-next {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding: 28px 0 60px; border-top: 1px solid var(--border);
+    font-family: var(--mono); font-size: 14px;
+  }
+  .prev-next.solo { justify-content: center; }
+  .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    color: var(--accent);
+    padding: 9px 18px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .nav-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  @media (max-width: 640px) {
+    .meta-row { flex-wrap: wrap; }
+  }
+  /* ── Dotted inline link (roadmap.sh-style) — lives inside set:html, so global ── */
+  :global(.cf-link) {
+    font: inherit;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+    padding: 0 0 3px;
+    margin: 0;
+    cursor: pointer;
+    background-image: radial-gradient(circle, var(--accent) 1.1px, transparent 1.3px);
+    background-size: 7px 2px;
+    background-repeat: repeat-x;
+    background-position: 0 100%;
+    transition: color .15s ease;
+  }
+  :global(.cf-link:hover),
+  :global(.cf-link:focus-visible) { color: var(--accent); outline: none; }
+
+  /* ── Cloudflared drawer ── */
+  .cf-drawer-root { position: fixed; inset: 0; z-index: 120; visibility: hidden; }
+  .cf-drawer-root.open { visibility: visible; }
+  .cf-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .cf-drawer-root.open .cf-backdrop { opacity: 1; }
+  .cf-panel {
+    position: absolute; top: 0; right: 0;
+    height: 100%; width: min(600px, 100%);
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    box-shadow: -24px 0 60px rgba(0, 0, 0, 0.28);
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+    display: flex; flex-direction: column;
+  }
+  .cf-drawer-root.open .cf-panel { transform: translateX(0); }
+  .cf-panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border); flex: 0 0 auto;
+  }
+  .cf-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    color: var(--accent); background: var(--accent-soft);
+    border: 1px solid var(--accent); border-radius: 999px; padding: 4px 12px 4px 10px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .cf-badge-icon { width: 15px; height: 15px; object-fit: contain; display: block; }
+  .cf-note { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; font-size: 14px; }
+  .cf-badge-logo { display: inline-flex; align-items: center; height: 20px; }
+  .cf-badge-logo img { height: 18px; width: auto; display: block; }
+  .cf-badge-logo .logo-dark { display: none; }
+  :global([data-theme="dark"]) .cf-badge-logo .logo-light { display: none; }
+  :global([data-theme="dark"]) .cf-badge-logo .logo-dark { display: block; }
+  .cf-close {
+    width: 34px; height: 34px; border: 1px solid var(--border-strong);
+    border-radius: var(--radius); background: transparent; color: var(--text);
+    cursor: pointer; font-size: 15px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .cf-close:hover { border-color: var(--accent); color: var(--accent); }
+  .cf-panel-body { padding: 24px 24px 48px; overflow-y: auto; flex: 1 1 auto; }
+  .cf-title { font-size: 26px; font-weight: 600; margin: 0 0 14px; letter-spacing: -0.01em; }
+  .cf-lead { color: var(--text-muted); line-height: 1.65; margin: 0 0 20px; }
+  .cf-panel-body p { line-height: 1.65; margin: 0 0 16px; }
+  .cf-panel-body code {
+    font-family: var(--mono); font-size: .88em;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 5px;
+  }
+  .cf-figure { margin: 0 0 24px; }
+  .cf-figure img {
+    width: 100%; height: auto; display: block;
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px;
+  }
+  .cf-figure figcaption {
+    font-size: 12.5px; color: var(--text-muted); font-style: italic;
+    margin-top: 8px; text-align: center;
+  }
+  .cf-h3 {
+    font-size: 13px; font-family: var(--mono); text-transform: uppercase;
+    letter-spacing: .06em; color: var(--text-muted);
+    margin: 26px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .cf-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .cf-steps li { line-height: 1.55; padding-left: 4px; }
+
+  /* roadmap.sh-style resources card */
+  .cf-resources {
+    border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; background: var(--bg-card);
+  }
+  .cf-res-head {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+  }
+  .cf-res-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; text-decoration: none; color: var(--text);
+    transition: background .15s ease;
+  }
+  .cf-res-row:hover { background: var(--accent-soft); }
+  .cf-res-logo { width: 22px; height: 22px; flex: 0 0 auto; object-fit: contain; }
+  .cf-res-gh { width: 22px; height: 22px; flex: 0 0 auto; color: var(--text); }
+  .cf-res-row:hover .cf-res-gh { color: var(--accent); }
+  .cf-res-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+  .cf-res-label { font-size: 14px; font-weight: 500; line-height: 1.35; }
+  .cf-res-row:hover .cf-res-label { color: var(--accent); }
+  .cf-res-sub { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+  .cf-res-ext { color: var(--text-muted); flex: 0 0 auto; }
+  .cf-res-row:hover .cf-res-ext { color: var(--accent); }
+  @media (max-width: 480px) {
+    .cf-panel-body { padding: 18px 16px 40px; }
+    .cf-title { font-size: 22px; }
+  }
+  /* Image lightbox */
+  .tline-figure img, .topology-figure img, .cf-figure img { cursor: zoom-in; }
+  .lightbox {
+    position: fixed; inset: 0; z-index: 300;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.88); padding: 24px; cursor: zoom-out;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 96vw; max-height: 92vh; width: auto; height: auto;
+    background: #fff; border-radius: 8px; padding: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .lightbox-close {
+    position: absolute; top: 16px; right: 18px;
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.4); color: #fff;
+    font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .15s ease;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,0.15); }
+</style>

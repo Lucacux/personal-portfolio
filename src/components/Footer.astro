@@ -1,0 +1,206 @@
+---
+import Icon from "./Icon.astro";
+import tuxGif from "../images/tux-penguin.gif";
+---
+
+<div class="section-outer footer-outer" id="contact">
+  <div class="footer-glow"></div>
+  <!-- Tux rain zone: spans from top of footer down to the separator line only -->
+  <div class="tuxrain-zone" id="tuxrain-zone" aria-hidden="true">
+    <div class="tuxrain-layer tuxrain-back" id="tuxrain-back"></div>
+    <div class="tuxrain-layer tuxrain-front" id="tuxrain-front"></div>
+  </div>
+
+  <div class="dot-pattern fade-r" style="top:24px;left:0;"></div>
+  <div class="dot-pattern fade-l" style="bottom:60px;right:0;"></div>
+
+  <div class="wrap section-inner footer-inner reveal">
+    <div class="footer-content">
+      <h2>Get in touch</h2>
+      <p class="lead">
+        I'm looking to grow my experience in systems, infrastructure or development. If you've got
+        something in mind — or just want to know how one of these projects works — reach out. I read everything.
+      </p>
+      <a class="mailto-btn" href="mailto:lucalombardi336@gmail.com">
+        <span class="mailto-icon">→</span>
+        lucalombardi336@gmail.com
+      </a>
+    </div>
+
+    <div class="foot-bottom" id="foot-bottom">
+      <span class="foot-credit"><img class="foot-tux" src={tuxGif.src} alt="Tux dancing" width="24" height="24" /> Built by Luca Lombardo — Pilar, Buenos Aires, AR</span>
+      <div class="foot-socials">
+        <a href="https://github.com/Lucacux" aria-label="GitHub" target="_blank" rel="noopener"><Icon name="github" /></a>
+        <a href="https://www.linkedin.com/in/luca-santiago-lombardo-038a97353/" aria-label="LinkedIn" target="_blank" rel="noopener"><Icon name="linkedin" /></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .footer-outer { position: relative; overflow: clip; }
+
+  /* ── Tux rain ── the zone is JS-sized to end exactly at the separator line ── */
+  .tuxrain-zone {
+    position: absolute;
+    inset: 0; /* full footer — tuxes rain across the whole section, past the separator */
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .tuxrain-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .tuxrain-layer img {
+    position: absolute;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    will-change: transform;
+  }
+  .tuxrain-back  { opacity: 0.32; filter: blur(3px); }
+  .tuxrain-front { opacity: 0.5;  filter: none; }
+  :global([data-theme="dark"]) .tuxrain-back  { opacity: 0.20; }
+  :global([data-theme="dark"]) .tuxrain-front { opacity: 0.32; }
+  @media (prefers-reduced-motion: reduce) { .tuxrain-zone { display: none; } }
+
+  .footer-glow {
+    position: absolute;
+    top: -40%;
+    right: 0;
+    width: min(500px, 80vw);
+    height: 500px;
+    max-width: 100%;
+    background: radial-gradient(circle, rgba(10,102,194,0.14) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(60px);
+  }
+  :global([data-theme="dark"]) .footer-glow {
+    background: radial-gradient(circle, rgba(96,165,250,0.1) 0%, transparent 70%);
+  }
+
+  .footer-inner { padding: 80px 0 44px; position: relative; z-index: 1; }
+  .footer-content { position: relative; z-index: 2; }
+  .footer-inner h2 { font-size: clamp(22px, 3vw + 8px, 40px); font-weight: 600; letter-spacing: -0.01em; margin-bottom: 14px; }
+  .lead { color: var(--text-muted); font-size: clamp(12px, 1vw + 7px, 15px); max-width: 50ch; margin-bottom: 28px; }
+
+  .mailto-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: clamp(15px, 1.2vw + 10px, 19px);
+    color: var(--text);
+    background: transparent;
+    padding: 0;
+    font-weight: 500;
+    transition: gap .2s ease, color .2s ease;
+  }
+  .mailto-btn:hover { color: var(--accent); gap: 16px; }
+  .mailto-icon { font-size: 18px; color: var(--accent); transition: transform .2s ease; }
+  .mailto-btn:hover .mailto-icon { transform: translateX(4px); }
+
+  .foot-bottom { margin-top: 56px; padding-top: 22px; position: relative; z-index: 3; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+  .foot-bottom::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100vw; height: 1px; background: var(--border); }
+  .foot-credit { display: flex; align-items: center; gap: 8px; }
+  .foot-tux { image-rendering: pixelated; image-rendering: -moz-crisp-edges; vertical-align: middle; }
+  .foot-socials { display: flex; gap: 12px; }
+  .foot-socials a { color: var(--text-muted); }
+  .foot-socials a:hover { color: var(--accent); }
+  .foot-socials :global(svg) { width: 15px; height: 15px; }
+
+  @media (max-width: 880px) { .foot-bottom { flex-direction: column; gap: 14px; align-items: flex-start; } }
+  @media (max-width: 480px) {
+    .footer-inner { padding: 32px 0 24px; }
+    .foot-bottom { margin-top: 28px; padding-top: 14px; font-size: 11.5px; }
+    .footer-glow { width: min(300px, 70vw); height: 300px; right: 0; top: -20%; max-width: 100%; }
+  }
+</style>
+
+<script is:inline define:vars={{ tuxSrc: tuxGif.src }}>
+(function () {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  var footer    = document.getElementById("contact");
+  var zone      = document.getElementById("tuxrain-zone");
+  if (!footer || !zone) return;
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+
+  function makeRain(container, opts) {
+    if (!container) return null;
+    var tuxes = [];
+    var rafId = null, active = false;
+
+    function spawn(prefill) {
+      if (tuxes.length >= opts.max) return;
+      var size = (rand(opts.minSize, opts.maxSize)) | 0;
+      var img = document.createElement("img");
+      img.src = tuxSrc;
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+      // prefill=true: place the tux at a random height already on screen (warm start),
+      // so when the user reaches the footer the rain is already in progress.
+      var startY = prefill
+        ? rand(-size, container.offsetHeight)
+        : -size - rand(0, 120);
+      var t = {
+        el: img,
+        x: rand(0, container.offsetWidth),
+        y: startY,
+        vy: rand(0.18, 0.34),   // same slow speed both layers
+        vx: rand(-0.08, 0.08),
+        rot: rand(0, 360),
+        vrot: rand(-0.25, 0.25),
+        size: size
+      };
+      img.style.transform = "translate(" + t.x + "px," + t.y + "px) rotate(" + t.rot + "deg)";
+      container.appendChild(img);
+      tuxes.push(t);
+    }
+
+    function tick() {
+      var h = container.offsetHeight;  // full section height
+      for (var i = 0; i < tuxes.length; i++) {
+        var t = tuxes[i];
+        t.y += t.vy; t.x += t.vx; t.rot += t.vrot;
+        // Continuous rain across the whole section: recycle to the top after exiting bottom.
+        if (t.y > h + t.size) {
+          t.y = -t.size - rand(0, 80);
+          t.x = rand(0, container.offsetWidth);
+          t.vy = rand(0.18, 0.34);
+        }
+        t.el.style.transform = "translate(" + t.x + "px," + t.y + "px) rotate(" + t.rot + "deg)";
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function start() {
+      if (active) return;
+      active = true;
+      // Warm start: immediately fill the screen with tuxes already mid-fall,
+      // so there's no empty gap while the user reaches the footer.
+      for (var k = 0; k < opts.max; k++) spawn(true);
+      tick();
+    }
+    function stop() {
+      active = false;
+      if (rafId) cancelAnimationFrame(rafId);
+    }
+    return { start: start, stop: stop };
+  }
+
+  var back  = makeRain(document.getElementById("tuxrain-back"),  { max: 9, minSize: 28, maxSize: 50, spawnEvery: 700 });
+  var front = makeRain(document.getElementById("tuxrain-front"), { max: 6, minSize: 22, maxSize: 40, spawnEvery: 850 });
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { back && back.start(); front && front.start(); }
+      else { back && back.stop(); front && front.stop(); }
+    });
+  }, { threshold: 0, rootMargin: "400px 0px 0px 0px" });
+  io.observe(footer);
+})();
+</script>

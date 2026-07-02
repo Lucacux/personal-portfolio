@@ -1,0 +1,190 @@
+---
+import { technologies, dailyDrivers } from "../data/stack";
+import tuxAnimated from "../images/90918211_1619280218785.gif";
+
+const logoModules = import.meta.glob("../images/*", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+function logoSrc(filename?: string) {
+  if (!filename) return undefined;
+  const match = Object.entries(logoModules).find(([path]) => path.endsWith("/" + filename));
+  return match?.[1];
+}
+function logoDarkSrc(filename?: string) {
+  if (!filename) return undefined;
+  const base = filename.replace(/\.[a-z0-9]+$/i, "");
+  const match = Object.entries(logoModules).find(([path]) => {
+    const fn = (path.split("/").pop() || "");
+    return fn.replace(/\.[a-z0-9]+$/i, "") === base + "-dark";
+  });
+  return match?.[1];
+}
+---
+
+<div class="section-outer" id="stack">
+  <div class="dot-pattern fade-r" style="top:24px;left:0;"></div>
+  <div class="dot-pattern fade-l" style="bottom:24px;right:0;"></div>
+  <div class="wrap section-inner reveal">
+    <div class="section-head">
+      <h2>Technologies</h2>
+      <span class="count">languages, infra &amp; tools</span>
+    </div>
+
+    {technologies.map((group) => (
+      <div class="tech-group">
+        <div class="tech-group-label">{group.group}</div>
+        <div class="chip-grid reveal-stagger">
+          {group.items.map((item) => (
+            <div class:list={["stack-chip", { ongoing: item.status === "ongoing" }, { "linux-chip": item.name === "Linux" }]}>
+              <div class="chip-logo">
+                {item.name === "Linux" ? (
+                  <>
+                    <img class="logo-static" src={logoSrc(item.logo)} alt="" loading="lazy" />
+                    <img class="logo-hover" src={tuxAnimated.src} alt="Tux" loading="lazy" />
+                  </>
+                ) : logoSrc(item.logo)
+                  ? (logoDarkSrc(item.logo)
+                      ? <>
+                          <img class="logo-light" src={logoSrc(item.logo)} alt="" loading="lazy" />
+                          <img class="logo-dark" src={logoDarkSrc(item.logo)} alt="" loading="lazy" />
+                        </>
+                      : <img src={logoSrc(item.logo)} alt="" loading="lazy" />
+                    )
+                  : <span class="abbr">{item.abbr}</span>
+                }
+              </div>
+              <div class="chip-text">
+                <div class="name">
+                  {item.name}
+                  {item.status === "ongoing" && <span class="ongoing-badge">ongoing</span>}
+                </div>
+                <div class="caption">{item.caption}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<div class="section-outer" id="drivers">
+  <div class="wrap section-inner reveal">
+    <div class="section-head">
+      <h2>Daily Drivers</h2>
+      <span class="count">primary hardware &amp; editors</span>
+    </div>
+    <div class="chip-grid drivers reveal-stagger">
+      {dailyDrivers.map((item) => (
+        <div class="stack-chip">
+          <div class="chip-logo driver-logo">
+            {logoSrc(item.logo)
+              ? (logoDarkSrc(item.logo)
+                  ? <>
+                      <img class="logo-light" src={logoSrc(item.logo)} alt="" loading="lazy" />
+                      <img class="logo-dark" src={logoDarkSrc(item.logo)} alt="" loading="lazy" />
+                    </>
+                  : <img src={logoSrc(item.logo)} alt="" loading="lazy" />
+                )
+              : <span class="abbr">{item.abbr}</span>
+            }
+          </div>
+          <div class="chip-text">
+            <div class="name">{item.name}</div>
+            <div class="caption">{item.caption}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .tech-group { margin-bottom: 36px; }
+  .tech-group:last-child { margin-bottom: 0; }
+  .tech-group-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 14px;
+  }
+
+  /* 4 columns on desktop, like char2cs */
+  .chip-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 1024px) { .chip-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 680px)  { .chip-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) {
+    .chip-grid { gap: 8px; }
+    .stack-chip { padding: 12px; gap: 10px; border-radius: 8px; }
+    .chip-logo { width: 32px; height: 32px; border-radius: 6px; padding: 3px; }
+    .chip-logo img { width: 26px; height: 26px; }
+    .chip-text .name { font-size: 15px; gap: 5px; margin-bottom: 2px; }
+    .chip-text .caption { font-size: 12.5px; }
+    .ongoing-badge { font-size: 8px; padding: 1px 5px; }
+    .tech-group { margin-bottom: 20px; }
+    .tech-group-label { font-size: 11px; margin-bottom: 8px; }
+  }
+  @media (max-width: 400px)  { .chip-grid { grid-template-columns: 1fr; } }
+
+  .stack-chip {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color .15s ease, transform .2s ease, box-shadow .2s ease;
+  }
+  .stack-chip:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+  /* Logo container */
+  .chip-logo {
+    width: 44px; height: 44px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    padding: 4px;
+  }
+  :global([data-theme="dark"]) .chip-logo { background: rgba(255,255,255,0.08); }
+  .chip-logo img { width: 36px; height: 36px; object-fit: contain; }
+  .logo-hover { display: none; image-rendering: pixelated; image-rendering: -moz-crisp-edges; }
+  .linux-chip:hover .logo-static { display: none; }
+  .linux-chip:hover .logo-hover { display: block; }
+  /* Light/dark logo swap (e.g. AWS, Bash) */
+  .chip-logo .logo-dark { display: none; }
+  :global([data-theme="dark"]) .chip-logo .logo-light { display: none; }
+  :global([data-theme="dark"]) .chip-logo .logo-dark { display: block; }
+  .chip-logo .abbr {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .driver-logo { background: transparent; }
+  :global([data-theme="dark"]) .driver-logo { background: rgba(255,255,255,0.08); }
+  .driver-logo .abbr { color: var(--copper); }
+
+  /* Text */
+  .chip-text .name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chip-text .caption { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+
+  .stack-chip.ongoing { border-style: dashed; }
+  .ongoing-badge {
+    font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--copper); background: var(--copper-soft);
+    padding: 2px 7px; border-radius: 999px;
+  }
+</style>

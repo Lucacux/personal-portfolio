@@ -1,0 +1,108 @@
+---
+import { certifications } from "../data/certifications";
+import { badges } from "../data/badges";
+const total = certifications.reduce((sum, c) => sum + c.items.length, 0);
+
+const logoModules = import.meta.glob("../images/*", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+function logoSrc(filename?: string) {
+  if (!filename) return undefined;
+  const match = Object.entries(logoModules).find(([path]) => path.endsWith("/" + filename));
+  return match?.[1];
+}
+function logoDarkSrc(filename?: string) {
+  if (!filename) return undefined;
+  const base = filename.replace(/\.[a-z0-9]+$/i, "");
+  const match = Object.entries(logoModules).find(([path]) => {
+    const fn = (path.split("/").pop() || "");
+    return fn.replace(/\.[a-z0-9]+$/i, "") === base + "-dark";
+  });
+  return match?.[1];
+}
+---
+
+<div class="section-outer" id="certs">
+  <div class="dot-pattern fade-r" style="top:24px;left:0;"></div>
+  <div class="dot-pattern fade-l" style="bottom:24px;right:0;"></div>
+  <div class="wrap section-inner reveal">
+    <div class="section-head">
+      <h2>Certificates</h2>
+      <span class="count">{total} total</span>
+    </div>
+    {badges.length > 0 && (
+      <div class="cert-group">
+        <div class="cert-cat">EY Badges</div>
+        <div class="cert-row reveal-stagger">
+          {badges.map((b) => {
+            const badgeImg = logoSrc(b.image);
+            return (
+              <a class="cert-chip" href={b.link} target="_blank" rel="noopener">
+                {badgeImg && <img class="ico-img badge-ico" src={badgeImg} alt="" loading="lazy" />}
+                {b.name} <span class="src">· {b.issuer}</span>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+    {certifications.map((group) => (
+      <div class="cert-group">
+        <div class="cert-cat">{group.category}</div>
+        <div class="cert-row reveal-stagger">
+          {group.items.map((c) => {
+            const src = logoSrc(c.logo);
+            const darkSrc = logoDarkSrc(c.logo);
+            const inner = (
+              <>
+                {src
+                  ? (darkSrc
+                      ? <>
+                          <img class="ico-img logo-light" src={src} alt="" loading="lazy" />
+                          <img class="ico-img logo-dark" src={darkSrc} alt="" loading="lazy" />
+                        </>
+                      : <img class="ico-img" src={src} alt="" loading="lazy" />
+                    )
+                  : <span class="ico">{c.issuerAbbr}</span>}
+                {c.name} <span class="src">· {c.issuer}</span>
+              </>
+            );
+            return c.link
+              ? <a class="cert-chip" href={c.link} target="_blank" rel="noopener">{inner}</a>
+              : <div class="cert-chip">{inner}</div>;
+          })}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .cert-group { margin-bottom: 32px; }
+  .cert-group:last-child { margin-bottom: 0; }
+  .cert-cat { font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+  .cert-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .cert-chip {
+    display: flex; align-items: center; gap: 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 18px; font-size: 14px; font-weight: 500;
+    transition: border-color .15s ease, transform .2s ease, box-shadow .2s ease;
+  }
+  a.cert-chip:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .cert-chip .ico { width: 28px; height: 28px; background: var(--copper-soft); color: var(--copper); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .cert-chip .ico-img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; border-radius: 5px; }
+  .cert-chip .badge-ico { width: 26px; height: 26px; border-radius: 4px; }
+  .cert-chip .ico-img.logo-dark { display: none; }
+  :global([data-theme="dark"]) .cert-chip .ico-img.logo-light { display: none; }
+  :global([data-theme="dark"]) .cert-chip .ico-img.logo-dark { display: inline-block; }
+  :global([data-theme="dark"]) .cert-chip .ico-img { background: rgba(255,255,255,0.12); padding: 2px; }
+  :global([data-theme="dark"]) .cert-chip .ico-img.badge-ico { background: transparent; padding: 0; }
+  .cert-chip .src { color: var(--text-muted); font-weight: 400; }
+  @media (max-width: 480px) {
+    .cert-chip { font-size: 12px; padding: 10px 12px; gap: 8px; border-radius: 6px; }
+    .cert-chip .ico { width: 22px; height: 22px; font-size: 9px; }
+    .cert-chip .ico-img { width: 22px; height: 22px; }
+    .cert-row { gap: 8px; }
+    .cert-group { margin-bottom: 20px; }
+    .cert-cat { font-size: 11px; margin-bottom: 10px; }
+  }
+</style>

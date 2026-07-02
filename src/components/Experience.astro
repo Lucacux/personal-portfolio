@@ -1,0 +1,200 @@
+---
+import { experience } from "../data/experience";
+
+const logoModules = import.meta.glob("../images/*", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+function logoSrc(filename?: string) {
+  if (!filename) return undefined;
+  const match = Object.entries(logoModules).find(([path]) => path.endsWith("/" + filename));
+  return match?.[1];
+}
+// Returns the dark-mode variant (e.g. "ey-2025-dark.svg") if it exists, else undefined.
+function logoDarkSrc(filename?: string) {
+  if (!filename) return undefined;
+  const base = filename.replace(/\.[a-z0-9]+$/i, "");
+  const match = Object.entries(logoModules).find(([path]) => {
+    const fn = (path.split("/").pop() || "");
+    return fn.replace(/\.[a-z0-9]+$/i, "") === base + "-dark";
+  });
+  return match?.[1];
+}
+---
+
+<div class="section-outer" id="experience">
+  <div class="dot-pattern fade-l" style="top:24px;right:0;"></div>
+  <div class="wrap section-inner reveal">
+    <div class="section-head">
+      <h2>Experience</h2>
+      <span class="count">professional roles</span>
+    </div>
+
+    {experience.map((e, i) => (
+      <div class:list={["exp-item", { first: i === 0 }]}>
+        <!-- Logo square — char2cs style -->
+        <div class="exp-logo-box">
+          {logoSrc(e.logo)
+            ? (logoDarkSrc(e.logo)
+                ? <>
+                    <img class="exp-logo logo-light" src={logoSrc(e.logo)} alt={`${e.company} logo`} loading="lazy" />
+                    <img class="exp-logo logo-dark" src={logoDarkSrc(e.logo)} alt={`${e.company} logo`} loading="lazy" />
+                  </>
+                : <img class="exp-logo" src={logoSrc(e.logo)} alt={`${e.company} logo`} loading="lazy" />
+              )
+            : <span class="exp-logo-abbr">{e.company.slice(0,2).toUpperCase()}</span>
+          }
+        </div>
+
+        <!-- Role + company + description -->
+        <div class="exp-info">
+          <div class="exp-role">{e.role}</div>
+          <div class="exp-company">{e.company}</div>
+          <p class="exp-desc">{e.description}</p>
+        </div>
+
+        <!-- Right column: date badge + skills -->
+        <div class="exp-aside">
+          <div class="exp-date-badge">{e.date}</div>
+          {e.skills && e.skills.length > 0 && (
+            <div class="exp-skills">
+              <div class="exp-skills-row">
+                {e.skills.map((s) => (
+                  <span class="exp-skill">
+                    {logoSrc(s.logo) && (
+                      logoDarkSrc(s.logo)
+                        ? <>
+                            <img class="logo-light" src={logoSrc(s.logo)} alt="" loading="lazy" />
+                            <img class="logo-dark" src={logoDarkSrc(s.logo)} alt="" loading="lazy" />
+                          </>
+                        : <img src={logoSrc(s.logo)} alt="" loading="lazy" />
+                    )}
+                    {s.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .exp-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+  }
+  .exp-item.first { border-top: none; padding-top: 0; }
+
+  /* Square logo — char2cs style */
+  .exp-logo-box {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 8px;
+  }
+  .exp-logo { width: 100%; height: 100%; object-fit: contain; }
+  /* Light/dark logo swap (e.g. EY) */
+  .exp-logo.logo-dark { display: none; }
+  :global([data-theme="dark"]) .exp-logo.logo-light { display: none; }
+  :global([data-theme="dark"]) .exp-logo.logo-dark { display: block; }
+  :global([data-theme="dark"]) .exp-logo-box { background: rgba(255,255,255,0.06); }
+  .exp-logo-abbr { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--accent); }
+
+  /* Text */
+  .exp-info { flex: 1; min-width: 0; }
+  .exp-role    { font-size: clamp(17px, 1vw + 12px, 20px); font-weight: 600; margin-bottom: 3px; }
+  .exp-company { font-size: 13.5px; font-family: var(--mono); color: var(--accent); margin-bottom: 10px; }
+  .exp-desc    { font-size: clamp(13px, 0.5vw + 11px, 14.5px); color: var(--text-muted); max-width: 62ch; }
+
+  /* Right column: date + skills, right-aligned */
+  .exp-aside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* Small skills row */
+  .exp-skills {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .exp-skills-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .exp-skill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-family: var(--mono);
+    color: var(--text);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 5px 11px;
+    border-radius: 999px;
+  }
+  .exp-skill img { height: 16px; width: auto; max-width: 60px; object-fit: contain; }
+  .exp-skill .logo-dark { display: none; }
+  :global([data-theme="dark"]) .exp-skill .logo-light { display: none; }
+  :global([data-theme="dark"]) .exp-skill .logo-dark { display: inline-block; }
+
+  /* Date badge */
+  .exp-date-badge {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    padding: 8px 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  /* Tablet & mobile: logo + aside (date/skills) on top row, text below — left-aligned */
+  @media (max-width: 880px) {
+    .exp-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas:
+        "logo aside"
+        "info info";
+      column-gap: 16px;
+      row-gap: 14px;
+      align-items: center;
+    }
+    .exp-logo-box { grid-area: logo; width: 54px; height: 54px; }
+    .exp-aside { grid-area: aside; align-items: flex-start; align-self: center; }
+    .exp-skills { align-items: flex-start; }
+    .exp-skills-row { justify-content: flex-start; }
+    .exp-info { grid-area: info; }
+  }
+  @media (max-width: 480px) {
+    .exp-item { padding: 18px 0; column-gap: 12px; row-gap: 12px; }
+    .exp-logo-box { width: 44px; height: 44px; border-radius: 10px; padding: 5px; }
+    .exp-date-badge { font-size: 11px; padding: 5px 12px; white-space: normal; }
+    .exp-role { font-size: 16px; }
+    .exp-company { font-size: 12px; margin-bottom: 6px; }
+    .exp-desc { font-size: 13px; line-height: 1.5; }
+    .exp-skill { font-size: 11.5px; padding: 4px 9px; }
+    .exp-skill img { height: 14px; width: auto; }
+  }
+</style>

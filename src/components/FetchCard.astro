@@ -1,0 +1,480 @@
+---
+import lucaPixel from "../images/luca-pixel.png";
+
+const rows = [
+  { k: "Role",   v: "IAM Provisioning Assoc. @ EY GDS" },
+  { k: "Study",  v: "Computer Eng. — USAL, Yr 3" },
+  { k: "Stack",  v: "Linux · Python · Bash · Docker" },
+  { k: "Focus",  v: "IAM · Security · Infrastructure" },
+  { k: "OS",     v: "Kali Linux x86_64" },
+  { k: "Editor", v: "VS Code · Visual Studio" },
+];
+
+const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8be9fd","#f8f8f2"];
+---
+
+<div class="term-card" id="term-card" tabindex="0">
+  <div class="term-titlebar">
+    <span class="term-title">luca@kali:~</span>
+    <div class="term-wm-buttons">
+      <span class="wm-btn wm-minimize">─</span>
+      <span class="wm-btn wm-maximize">□</span>
+      <span class="wm-btn wm-close">×</span>
+    </div>
+  </div>
+  <div class="term-menubar">
+    <span>Session</span><span>Actions</span><span>Edit</span><span>View</span><span>Help</span>
+  </div>
+
+  <div class="term-stage" id="term-stage">
+    <!-- neofetch content -->
+    <div class="term-content" id="term-neofetch">
+      <div class="term-body">
+        <div class="term-left">
+          <img class="term-avatar" src={lucaPixel.src} alt="Luca Lombardo pixel art" width="140" height="140" />
+        </div>
+        <div class="term-right">
+          <div class="term-username">
+            <span class="t-user">luca</span><span class="t-at">@</span><span class="t-host">linux</span>
+          </div>
+          <div class="term-sep">─────────────────────────</div>
+          {rows.map(r => (
+            <div class="term-row">
+              <span class="t-key">{r.k}</span>
+              <span class="t-colon">: </span>
+              <span class="t-val">{r.v}</span>
+            </div>
+          ))}
+          <div class="term-palette">
+            {colors.map(c => <span class="t-color" style={`background:${c}`}></span>)}
+          </div>
+          <div class="term-hint" id="term-hint">try typing <span class="t-hint-cmd">cmatrix</span> or <span class="t-hint-cmd">tux-rain</span></div>
+        </div>
+      </div>
+
+      <div class="term-prompt-line">
+        <span class="t-user">luca</span><span class="t-at">@</span><span class="t-host">linux</span><span class="t-promptsym">:~$ </span><span class="t-hint" id="term-typed-text"></span><span class="t-cursor">█</span>
+      </div>
+    </div>
+
+    <!-- cmatrix canvas overlays the content area -->
+    <canvas class="cmatrix-canvas" id="cmatrix-canvas"></canvas>
+    <div class="cmatrix-exit-hint" id="cmatrix-exit-hint">Press Ctrl+C to exit</div>
+  </div>
+</div>
+
+<style>
+  .term-card {
+    --t-bg:        #F4F3EF;
+    --t-bar:       #E0DFDB;
+    --t-menu:      #E8E7E3;
+    --t-border:    rgba(0,0,0,0.12);
+    --t-title:     #6b6e73;
+    --t-text:      #1A1B1E;
+    --t-muted:     #888;
+    --t-user:      #2563EB;
+    --t-host:      #2563EB;
+    --t-sep:       #c5c5c0;
+    --t-key:       #1d4ed8;
+    --t-val:       #1A1B1E;
+    --t-box:       #93a3b8;
+    --t-dollar:    #2563EB;
+    --t-path:      #3b82f6;
+
+    background: var(--t-bg);
+    border: 1px solid var(--t-border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 24px 48px -16px rgba(0,0,0,0.18);
+    font-family: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+    font-size: 13px;
+    color: var(--t-text);
+    outline: none;
+  }
+
+  :global([data-theme="dark"]) .term-card {
+    --t-bg:        #1A1B1E;
+    --t-bar:       #2A2B2F;
+    --t-menu:      #232428;
+    --t-border:    rgba(255,255,255,0.08);
+    --t-title:     #9a9eab;
+    --t-text:      #E4E4E7;
+    --t-muted:     #71717A;
+    --t-user:      #60a5fa;
+    --t-host:      #60a5fa;
+    --t-sep:       #3F3F46;
+    --t-key:       #93c5fd;
+    --t-val:       #E4E4E7;
+    --t-box:       #64748b;
+    --t-dollar:    #60a5fa;
+    --t-path:      #93c5fd;
+    box-shadow: 0 24px 48px -16px rgba(0,0,0,0.55);
+  }
+
+  .term-titlebar {
+    background: var(--t-bar);
+    padding: 7px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-bottom: 1px solid var(--t-border);
+  }
+  .term-title { font-size: 12px; color: var(--t-title); }
+  .term-wm-buttons {
+    position: absolute;
+    right: 8px;
+    display: flex;
+    gap: 0;
+  }
+  .wm-btn {
+    width: 26px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--t-title);
+  }
+  .wm-btn:hover { background: rgba(0,0,0,0.08); }
+  :global([data-theme="dark"]) .wm-btn:hover { background: rgba(255,255,255,0.08); }
+  .wm-close:hover { background: #e04040 !important; color: #fff; }
+
+  .term-menubar {
+    background: var(--t-menu);
+    padding: 3px 10px;
+    display: flex;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--t-muted);
+    border-bottom: 1px solid var(--t-border);
+  }
+  .term-menubar span { padding: 2px 8px; border-radius: 3px; }
+  .term-menubar span:hover { background: rgba(0,0,0,0.06); color: var(--t-text); }
+  :global([data-theme="dark"]) .term-menubar span:hover { background: rgba(255,255,255,0.06); }
+
+  /* Stage: relative container for overlay */
+  .term-stage { position: relative; }
+
+  .term-content {
+    transition: opacity 0.4s ease;
+  }
+  .term-content.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .term-body {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 24px;
+    padding: 20px 24px 8px;
+    align-items: start;
+  }
+  .term-avatar {
+    width: 140px; height: 140px;
+    object-fit: cover;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    border-radius: 4px;
+    border: 1px solid var(--t-border);
+  }
+
+  .t-box { color: var(--t-box); }
+  .t-user { color: var(--t-user); font-weight: 600; }
+  .t-at { color: var(--t-text); }
+  .t-host { color: var(--t-host); font-weight: 600; }
+  .t-path { color: var(--t-path); font-weight: 600; }
+  .t-dollar { color: var(--t-dollar); font-weight: 700; }
+  .t-typed { color: var(--t-text); }
+
+  .term-username { margin-bottom: 2px; font-size: 14px; font-weight: 600; }
+  .term-sep { color: var(--t-sep); margin-bottom: 6px; font-size: 12px; overflow: hidden; }
+
+  .term-row { display: grid; grid-template-columns: 52px 12px minmax(0, 1fr); padding: 1.5px 0; }
+  .t-key   { color: var(--t-key); font-weight: 500; }
+  .t-colon { color: var(--t-muted); }
+  .t-val   { color: var(--t-val); overflow-wrap: break-word; word-break: break-word; min-width: 0; }
+
+  .term-palette { display: flex; gap: 3px; margin-top: 14px; }
+  .t-color { width: 22px; height: 14px; border-radius: 2px; }
+
+  .term-prompt-line { padding: 10px 24px 14px; font-size: 13px; line-height: 1.6; }
+  .t-promptsym { color: var(--t-text); }
+  .t-hint { color: #50fa7b; }
+  .t-cursor {
+    color: var(--t-text);
+    animation: blink 1.1s steps(1) infinite;
+    font-size: 14px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .term-hint {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--t-muted);
+    opacity: 0.6;
+  }
+  .t-hint-cmd { color: var(--t-user); font-weight: 500; }
+
+  /* cmatrix: absolute overlay filling the stage */
+  .cmatrix-canvas {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 1;
+  }
+  .cmatrix-canvas.active { display: block; }
+
+  .cmatrix-exit-hint {
+    display: none;
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    font-size: 11px;
+    color: rgba(80,250,123,0.5);
+    z-index: 2;
+  }
+  .cmatrix-exit-hint.active { display: block; }
+
+  @media (max-width: 560px) {
+    .term-card { font-size: 12px; border-radius: 6px; }
+    .term-titlebar { padding: 6px 10px; }
+    .term-title { font-size: 11px; }
+    .term-menubar { display: none; }
+    .wm-btn { width: 22px; height: 20px; font-size: 11px; }
+    .term-body { grid-template-columns: 78px minmax(0, 1fr); gap: 12px; padding: 14px 12px 6px; }
+    .term-avatar { width: 72px; height: 72px; border-radius: 3px; }
+    .term-username { font-size: 13px; margin-bottom: 1px; }
+    .term-sep { font-size: 10px; margin-bottom: 4px; }
+    .term-row { grid-template-columns: 48px 8px minmax(0, 1fr); font-size: 11.5px; padding: 1.5px 0; }
+    .term-palette { margin-top: 8px; gap: 3px; }
+    .t-color { width: 14px; height: 10px; }
+    .term-prompt-line { padding: 6px 12px 8px; font-size: 11.5px; }
+    .term-hint { font-size: 10px; margin-top: 8px; }
+  }
+</style>
+
+<script is:inline>
+(function () {
+  var card = document.getElementById("term-card");
+  var neofetch = document.getElementById("term-neofetch");
+  var canvas = document.getElementById("cmatrix-canvas");
+  var exitHint = document.getElementById("cmatrix-exit-hint");
+  var typedText = document.getElementById("term-typed-text");
+  if (!card || !neofetch || !canvas || !exitHint || !typedText) return;
+
+  var ctx = canvas.getContext("2d");
+  var typed = "";
+  var animId = null;
+  var running = false;
+  var mode = "";
+  var columns = [];
+  var chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  // ── cmatrix ──
+  function startMatrix() {
+    running = true; mode = "cmatrix";
+    var stage = document.getElementById("term-stage");
+    canvas.width = stage.offsetWidth;
+    canvas.height = stage.offsetHeight;
+    neofetch.classList.add("hidden");
+    canvas.classList.add("active");
+    exitHint.classList.add("active");
+
+    var fontSize = 14;
+    var colCount = Math.floor(canvas.width / fontSize);
+    columns = [];
+    for (var i = 0; i < colCount; i++) columns.push(Math.random() * -40 | 0);
+
+    function draw() {
+      ctx.fillStyle = "rgba(0,0,0,0.06)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = fontSize + "px monospace";
+      for (var i = 0; i < columns.length; i++) {
+        var ch = chars[Math.random() * chars.length | 0];
+        ctx.fillStyle = Math.random() > 0.95 ? "#f8f8f2" : "#50fa7b";
+        ctx.fillText(ch, i * fontSize, columns[i] * fontSize);
+        if (columns[i] * fontSize > canvas.height && Math.random() > 0.975) columns[i] = 0;
+        columns[i]++;
+      }
+      animId = requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  // ── tux-rain ──
+  var tuxes = [];
+  var tuxRainId = null;
+  var tuxContainer = null;
+  var GRAVITY = 0.35;
+  var BOUNCE = 0.55;
+  var SPAWN_RATE = 3;
+  var MAX_TUXES = 80;
+  var tuxSrc = "";
+
+  function findTuxSrc() {
+    var imgs = document.querySelectorAll("img");
+    for (var i = 0; i < imgs.length; i++) {
+      if (imgs[i].src && imgs[i].src.indexOf("tux") !== -1) { return imgs[i].src; }
+    }
+    return "";
+  }
+
+  function startTuxRain() {
+    running = true; mode = "tux-rain";
+    tuxSrc = findTuxSrc();
+    if (!tuxSrc) { running = false; return; }
+
+    tuxContainer = document.createElement("div");
+    tuxContainer.id = "tux-rain-container";
+    tuxContainer.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;z-index:9998;pointer-events:none;overflow:hidden;";
+    document.body.appendChild(tuxContainer);
+
+    tuxes = [];
+    var frameCount = 0;
+    var spawnPhase = true;
+    setTimeout(function () { spawnPhase = false; }, 4000);
+
+    function spawnTux() {
+      if (tuxes.length >= MAX_TUXES) return;
+      var size = 20 + Math.random() * 28 | 0;
+      var t = {
+        x: Math.random() * window.innerWidth,
+        y: -size - Math.random() * 200,
+        vx: (Math.random() - 0.5) * 4,
+        vy: Math.random() * 2 + 1,
+        rot: Math.random() * 360,
+        vrot: (Math.random() - 0.5) * 10,
+        size: size,
+        el: null,
+        bounces: 0
+      };
+      var img = document.createElement("img");
+      img.src = tuxSrc;
+      img.style.cssText = "position:absolute;image-rendering:pixelated;image-rendering:-moz-crisp-edges;width:" + size + "px;height:" + size + "px;pointer-events:none;";
+      tuxContainer.appendChild(img);
+      t.el = img;
+      tuxes.push(t);
+    }
+
+    function updateRain() {
+      frameCount++;
+      if (spawnPhase && frameCount % SPAWN_RATE === 0) spawnTux();
+
+      var viewW = window.innerWidth;
+      var viewH = window.innerHeight;
+
+      for (var i = tuxes.length - 1; i >= 0; i--) {
+        var t = tuxes[i];
+        t.vy += GRAVITY;
+        t.vx *= 0.998;
+        t.x += t.vx;
+        t.y += t.vy;
+        t.rot += t.vrot;
+        t.vrot *= 0.997;
+
+        // floor
+        if (t.y > viewH - t.size) {
+          t.y = viewH - t.size;
+          t.vy = -Math.abs(t.vy) * BOUNCE;
+          t.vx *= 0.9;
+          t.vrot = t.vx * 0.5;
+          t.bounces++;
+        }
+        // walls
+        if (t.x < 0) { t.x = 0; t.vx = Math.abs(t.vx) * BOUNCE; }
+        if (t.x > viewW - t.size) { t.x = viewW - t.size; t.vx = -Math.abs(t.vx) * BOUNCE; }
+
+        t.el.style.transform = "translate(" + t.x + "px," + t.y + "px) rotate(" + t.rot + "deg)";
+
+        if (t.bounces > 6) {
+          t.el.style.opacity = Math.max(0, 1 - (t.bounces - 6) * 0.2);
+          if (t.bounces > 10) {
+            tuxContainer.removeChild(t.el);
+            tuxes.splice(i, 1);
+          }
+        }
+      }
+      if (!spawnPhase && tuxes.length === 0) {
+        stopTuxRain();
+        running = false; mode = "";
+        typed = ""; typedText.textContent = "";
+        return;
+      }
+      tuxRainId = requestAnimationFrame(updateRain);
+    }
+    tuxRainId = requestAnimationFrame(updateRain);
+  }
+
+  function stopTuxRain() {
+    if (tuxRainId) cancelAnimationFrame(tuxRainId);
+    tuxRainId = null;
+    if (tuxContainer && tuxContainer.parentNode) {
+      tuxContainer.parentNode.removeChild(tuxContainer);
+    }
+    tuxContainer = null;
+    tuxes = [];
+  }
+
+  // ── stop any mode ──
+  function stopAll() {
+    if (mode === "cmatrix") {
+      if (animId) cancelAnimationFrame(animId);
+      animId = null;
+      canvas.classList.remove("active");
+      exitHint.classList.remove("active");
+      neofetch.classList.remove("hidden");
+    } else if (mode === "tux-rain") {
+      stopTuxRain();
+    }
+    running = false;
+    mode = "";
+    typed = "";
+    typedText.textContent = "";
+  }
+
+  card.addEventListener("keydown", function (e) {
+    if (running) {
+      if (e.ctrlKey && e.key === "c") {
+        e.preventDefault();
+        stopAll();
+      }
+      return;
+    }
+    // Execute the typed command ONLY on Enter (like a real shell)
+    if (e.key === "Enter") {
+      e.preventDefault();
+      var cmd = typed.trim();
+      if (cmd === "cmatrix") { startMatrix(); }
+      else if (cmd === "tux-rain") { startTuxRain(); }
+      else {
+        // Unknown command: brief feedback, then clear the line
+        if (cmd.length) {
+          typedText.textContent = typed;
+        }
+      }
+      typed = "";
+      typedText.textContent = "";
+      return;
+    }
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      typed = typed.slice(0, -1);
+      typedText.textContent = typed;
+      return;
+    }
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      typed += e.key;
+      typedText.textContent = typed;
+    }
+  });
+
+  card.addEventListener("click", function () { card.focus(); });
+})();
+</script>

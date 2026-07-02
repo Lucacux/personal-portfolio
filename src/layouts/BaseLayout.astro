@@ -1,0 +1,61 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Luca Lombardo — IAM Provisioning Associate @ EY GDS",
+  description = "Computer Engineering student and Linux enthusiast. IAM Provisioning Associate at EY GDS, Linux, infra & open-source enthusiast.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+    <script is:inline>
+      // Set theme before paint to avoid a flash of the wrong theme.
+      // If the user picked a theme manually it's stored; otherwise follow the OS.
+      const stored = localStorage.getItem("theme");
+      const theme = stored ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+
+      // Live-follow the OS preference, but only while the user hasn't chosen manually.
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function (e) {
+        if (localStorage.getItem("theme")) return; // respect manual choice
+        document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+      });
+    </script>
+  </head>
+  <body>
+    <slot />
+    <script is:inline>
+      (function () {
+        var obs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add("visible");
+              obs.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.05, rootMargin: '0px 0px -60px 0px' });
+        document.querySelectorAll(".reveal, .reveal-stagger").forEach(function (el) {
+          obs.observe(el);
+        });
+      })();
+    </script>
+  </body>
+</html>
