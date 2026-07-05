@@ -103,7 +103,7 @@ import tuxGif from "../images/tux-penguin.gif";
   .mailto-btn:hover .mailto-icon { transform: translateX(4px); }
 
   .foot-bottom { margin-top: 56px; padding-top: 22px; position: relative; z-index: 3; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
-  .foot-bottom::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100vw; height: 1px; background: var(--border); }
+  .foot-bottom::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; height: 1px; background: var(--border); }
   .foot-credit { display: flex; align-items: center; gap: 8px; }
   .foot-tux { image-rendering: pixelated; image-rendering: -moz-crisp-edges; vertical-align: middle; }
   .foot-socials { display: flex; gap: 12px; }
@@ -132,7 +132,7 @@ import tuxGif from "../images/tux-penguin.gif";
   function makeRain(container, opts) {
     if (!container) return null;
     var tuxes = [];
-    var rafId = null, active = false;
+    var rafId = null, active = false, lastTime = 0;
 
     function spawn(prefill) {
       if (tuxes.length >= opts.max) return;
@@ -161,11 +161,19 @@ import tuxGif from "../images/tux-penguin.gif";
       tuxes.push(t);
     }
 
-    function tick() {
+    function tick(now) {
+      // Delta-time normalization: physics advances by real elapsed time, not per-frame,
+      // so the rain keeps a constant speed whether the device runs at 60fps or drops to 30fps.
+      // The clamp stops it from "catching up" in a burst after a stutter (the lag-then-accelerate bug).
+      if (!lastTime) lastTime = now;
+      var dt = (now - lastTime) / 16.6667; // 1.0 == one 60fps frame
+      lastTime = now;
+      if (dt > 2.5) dt = 2.5;
+
       var h = container.offsetHeight;  // full section height
       for (var i = 0; i < tuxes.length; i++) {
         var t = tuxes[i];
-        t.y += t.vy; t.x += t.vx; t.rot += t.vrot;
+        t.y += t.vy * dt; t.x += t.vx * dt; t.rot += t.vrot * dt;
         // Continuous rain across the whole section: recycle to the top after exiting bottom.
         if (t.y > h + t.size) {
           t.y = -t.size - rand(0, 80);
@@ -183,7 +191,8 @@ import tuxGif from "../images/tux-penguin.gif";
       // Warm start: immediately fill the screen with tuxes already mid-fall,
       // so there's no empty gap while the user reaches the footer.
       for (var k = 0; k < opts.max; k++) spawn(true);
-      tick();
+      lastTime = 0;
+      rafId = requestAnimationFrame(tick);
     }
     function stop() {
       active = false;

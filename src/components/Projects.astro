@@ -27,6 +27,10 @@ const tagLogos: Record<string, string | undefined> = {
   "Jellyfin": imgUrl("jellyfin-logo.svg"),
   "OpenWrt": imgUrl("OpenWrt_Logo.svg"),
   "Firewall": imgUrl("firewall.svg"),
+  "VLANs": imgUrl("router.svg"),
+  "DNS-over-HTTPS": imgUrl("dns.svg"),
+  "SQM / CAKE": imgUrl("qos.svg"),
+  "zram": imgUrl("ram-memory.svg"),
 };
 
 // OpenWrt wordmark for the OpenWrt card title (light + dark variants).
@@ -113,7 +117,17 @@ const openwrtLogoDark = imgUrl("OpenWrt_Logo-dark.svg");
   }
   @media (max-width: 480px) {
     .tl-item { grid-template-columns: 1fr; gap: 0; }
-    .tl-marker { display: none; }
+    /* Show the project number above each card instead of hiding it (no left rail in single column) */
+    .tl-marker {
+      display: block;
+      padding-top: 0;
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+    .tl-marker::after { display: none; }
     .project-card { padding: 14px 12px; margin-bottom: 16px; }
     .thumb { height: 150px; }
     .project-card h3 { font-size: 14px; }

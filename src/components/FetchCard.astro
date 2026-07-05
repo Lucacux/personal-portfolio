@@ -200,7 +200,7 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
   .t-colon { color: var(--t-muted); }
   .t-val   { color: var(--t-val); overflow-wrap: break-word; word-break: break-word; min-width: 0; }
 
-  .term-palette { display: flex; gap: 3px; margin-top: 14px; }
+  .term-palette { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 14px; }
   .t-color { width: 22px; height: 14px; border-radius: 2px; }
 
   .term-prompt-line { padding: 10px 24px 14px; font-size: 13px; line-height: 1.6; }
@@ -352,8 +352,13 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
     document.body.appendChild(tuxContainer);
 
     tuxes = [];
+    // Fewer tuxes on small screens: the number of animated DOM nodes is what makes
+    // weaker mobile GPUs drop frames in the first place.
+    MAX_TUXES = window.matchMedia("(max-width: 560px)").matches ? 45 : 80;
     var frameCount = 0;
     var spawnPhase = true;
+    var lastTime = 0, acc = 0;
+    var STEP = 16.6667; // one 60fps physics step, in ms
     setTimeout(function () { spawnPhase = false; }, 4000);
 
     function spawnTux() {
@@ -378,7 +383,9 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
       tuxes.push(t);
     }
 
-    function updateRain() {
+    // One fixed physics step (60Hz). Constants below stay exactly as tuned — the
+    // fixed-timestep loop just decouples them from the render frame rate.
+    function physicsStep() {
       frameCount++;
       if (spawnPhase && frameCount % SPAWN_RATE === 0) spawnTux();
 
@@ -416,6 +423,25 @@ const colors = ["#282a36","#ff5555","#50fa7b","#f1fa8c","#bd93f9","#ff79c6","#8b
           }
         }
       }
+    }
+
+    function updateRain(now) {
+      // Accumulate real elapsed time and run fixed 60Hz steps. If a frame is late,
+      // we catch up with a few extra steps — but capped, so a stutter never turns into
+      // a speed burst (the "lags then accelerates" symptom on mobile).
+      if (!lastTime) lastTime = now;
+      var elapsed = now - lastTime;
+      lastTime = now;
+      if (elapsed > 100) elapsed = 100; // hard cap on catch-up (~6 steps max)
+      acc += elapsed;
+
+      var steps = 0;
+      while (acc >= STEP && steps < 6) {
+        physicsStep();
+        acc -= STEP;
+        steps++;
+      }
+
       if (!spawnPhase && tuxes.length === 0) {
         stopTuxRain();
         running = false; mode = "";

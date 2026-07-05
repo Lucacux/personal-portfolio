@@ -25,7 +25,7 @@ The core of the project was never the software itself, but the infrastructure pr
 
 ## From recovered hardware to a NAS
 
-The first machine — a Pentium E5400 with 2 GB of RAM and a 500 GB HDD — was cleaned, re-pasted, and restored to working condition. After an initial period as a Linux learning environment, it was provisioned as a **NAS running Ubuntu 24.04 LTS**.
+The first machine — a Pentium E5400 with 2 GiB of RAM and a 500 GB HDD — was cleaned, re-pasted, and restored to working condition. After an initial period as a Linux learning environment, it was provisioned as a **NAS running Ubuntu 24.04 LTS**.
 
 The first milestone was a working **Samba** deployment, configured from scratch over several iterations. It provided network file storage at transfer speeds well beyond the available internet bandwidth, and established a practical understanding of how traffic behaves within a private LAN. A local **Plex** server followed shortly after.
 
@@ -49,8 +49,8 @@ This established a foundation for hosting additional services with appropriate a
 The homelab currently comprises three machines, each assigned to a specific role:
 
 - **`pentium`** — the recovered Dell OptiPlex on **Ubuntu Server**; the original NAS and the primary always-on host (Samba, Jellyfin, Plex, Cloudflare Tunnel).
-- **`server-sempron`** — the former Windows XP machine, rebuilt on **Debian Trixie**. Single core, 512 MB of RAM, and a 20-year-old disk with roughly 1,000 hours of use — a demonstration that durable hardware paired with a lean, secure OS remains viable. Operates as a hardened personal cloud accessible only via SSH forwarding.
-- **`server-mbp`** — a 2011 MacBook Pro on **Arch Linux**, selected for its SSD and 10 GB of RAM. Serves as the high-agility node, running a PostgreSQL and Redis stack in **Docker Compose** for a collaborative database project.
+- **`server-sempron`** — the former Windows XP machine, rebuilt on **Debian Trixie**. Single core, 512 MiB of RAM, and a 20-year-old disk with roughly 1,000 hours of use — a demonstration that durable hardware paired with a lean, secure OS remains viable. Operates as a hardened personal cloud accessible only via SSH forwarding.
+- **`server-mbp`** — a 2011 MacBook Pro on **Arch Linux**, selected for its SSD and 10 GiB of RAM. Serves as the high-agility node, running a PostgreSQL and Redis stack in **Docker Compose** for a collaborative database project.
 
 ![server-mbp](../../images/server-mbp.png)
 *`server-mbp` — a 2011 MacBook Pro running Arch Linux as the high-agility node.*

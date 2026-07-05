@@ -35,6 +35,10 @@ const tagLogos: Record<string, string | undefined> = {
   "Jellyfin": imgUrl("jellyfin-logo.svg"),
   "OpenWrt": imgUrl("OpenWrt_Logo.svg"),
   "Firewall": imgUrl("firewall.svg"),
+  "VLANs": imgUrl("router.svg"),
+  "DNS-over-HTTPS": imgUrl("dns.svg"),
+  "SQM / CAKE": imgUrl("qos.svg"),
+  "zram": imgUrl("ram-memory.svg"),
 };
 
 const all = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
@@ -314,7 +318,7 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
             </figure>
           )}
 
-          <h3 class="cf-h3">2 · DNS over HTTPS — encrypted upstream</h3>
+          <h3 class="cf-h3 cf-h3--doh">2 · DNS over HTTPS — encrypted upstream</h3>
           <p>
             Local devices still ask the OpenWrt router on port 53 (forced by a DNS-LOCK rule). The
             router then resolves the query upstream to a public resolver over HTTPS on port 443 —
@@ -327,7 +331,7 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
             </figure>
           )}
 
-          <h3 class="cf-h3">3 · What the ISP actually sees</h3>
+          <h3 class="cf-h3 cf-h3--doh">3 · What the ISP actually sees</h3>
           <p>
             From the ISP's side there's no readable query left — just a TLS session between my router
             and the resolver, carrying opaque "Application Data". They can tell I'm talking to a DNS
@@ -598,14 +602,14 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
   .prev-next {
     display: flex; justify-content: space-between; gap: 16px;
     padding: 28px 0 60px; border-top: 1px solid var(--border);
-    font-family: var(--mono); font-size: 14px;
+    font-family: var(--sans); font-size: 14px;
   }
   .prev-next.solo { justify-content: center; }
   .nav-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-family: var(--mono);
+    font-family: var(--sans);
     color: var(--accent);
     padding: 9px 18px;
     border: 1px solid var(--border-strong);
@@ -705,6 +709,8 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
     letter-spacing: .06em; color: var(--text-muted);
     margin: 26px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
   }
+  /* OpenWrt-orange titles for the DoH "solution" steps (2 & 3) */
+  .cf-h3--doh { color: #F6821F; }
   .cf-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 10px; }
   .cf-steps li { line-height: 1.55; padding-left: 4px; }
 

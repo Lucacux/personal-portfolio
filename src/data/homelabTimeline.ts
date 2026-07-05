@@ -19,7 +19,7 @@ export const homelabTimeline: TimelineEntry[] = [
     year: "2023",
     title: "First contact with Linux",
     logo: "peppermint-logo.svg",
-    body: "Pressed into service as a daily driver, the Pentium E5400 (2 GB RAM, 500 GB HDD) ran Peppermint Linux. This was where the fundamentals clicked: the terminal, package repositories, and how distributions and flavors actually differ.",
+    body: "Pressed into service as a daily driver, the Pentium E5400 (2 GiB RAM, 500 GB HDD) ran Peppermint Linux. This was where the fundamentals clicked: the terminal, package repositories, and how distributions and flavors actually differ.",
   },
   {
     year: "2024",
@@ -41,7 +41,7 @@ export const homelabTimeline: TimelineEntry[] = [
   {
     year: "2025",
     title: "Maxing out the hardware",
-    body: "By mid-2025 the pentium host was pushed to its ceiling: 4 GB of DDR3, the most the board would accept. A modest bump on paper, but enough headroom to run Samba, Plex, and the tunneling stack side by side on hardware that was never meant to be a server.",
+    body: "By mid-2025 the pentium host was pushed to its ceiling: 4 GiB of DDR3, the most the board would accept. A modest bump on paper, but enough headroom to run Samba, Plex, and the tunneling stack side by side on hardware that was never meant to be a server.",
   },
   {
     year: "2025",
@@ -55,14 +55,14 @@ export const homelabTimeline: TimelineEntry[] = [
     year: "2025",
     title: "The Debian dinosaur",
     logo: "debian-original.svg",
-    body: "With the workflow established, the old XP machine was rebuilt on Debian Trixie — single core, 512 MB of RAM, a 20-year-old disk with roughly 1,000 hours of use. Hardened and tunneled, it became a personal cloud reachable only via SSH forwarding: proof that durable hardware and a lean, secure OS still hold up.",
+    body: "With the workflow established, the old XP machine was rebuilt on Debian Trixie — single core, 512 MiB of RAM, a 20-year-old disk with roughly 1,000 hours of use. Hardened and tunneled, it became a personal cloud reachable only via SSH forwarding: proof that durable hardware and a lean, secure OS still hold up.",
     filled: true,
   },
   {
     year: "2026",
     title: "A self-hosted personal cloud",
     logo: "jellyfin-logo.svg",
-    body: "Jellyfin, exposed on its own subdomain and paired with yt-dlp for a lossless FLAC music library, replaced a Spotify subscription. A 2011 MacBook Pro joined the fleet on Arch Linux — its SSD and 10 GB of RAM serving a PostgreSQL and Redis stack in Docker Compose for a collaborative database project.",
+    body: "Jellyfin, exposed on its own subdomain and paired with yt-dlp for a lossless FLAC music library, replaced a Spotify subscription. A 2011 MacBook Pro joined the fleet on Arch Linux — its SSD and 10 GiB of RAM serving a PostgreSQL and Redis stack in Docker Compose for a collaborative database project.",
     image: "server-mbp.png",
     caption: "server-mbp — a 2011 MacBook Pro on Arch Linux, the high-agility node.",
     filled: true,

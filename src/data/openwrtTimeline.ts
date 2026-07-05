@@ -28,6 +28,7 @@ export const openwrtTimeline: TimelineEntry[] = [
   {
     year: "2025",
     title: "Segmenting with VLANs",
+    logo: "router.svg",
     body: "As the homelab grew past a single server, security demanded isolation — servers reachable only by the devices I choose, not everything on the LAN. Working at night (this is the router the whole family shares, so downtime was real), the homeserver moved into a dedicated VLAN. The payoff is asymmetric visibility: I can reach the server, but the server can't see back into the LAN — enforced with LAN→VLAN firewall rules — plus a much quieter wire, with far less broadcast noise.",
   },
   {
