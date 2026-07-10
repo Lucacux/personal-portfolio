@@ -23,7 +23,11 @@ export const openwrtTimeline: TimelineEntry[] = [
   {
     year: "2025",
     title: "Breaking the 16 MiB wall",
-    body: "16 MiB of flash barely fits the OS. extroot relocates the root filesystem onto a standard USB stick, so packages and system parts live there instead — turning almost no space into ~16 GB of headroom. The trade-off is honest: the USB is written to constantly and wears over time.",
+    image: "16gib.webp",
+    caption: "The USB stick hosting the extroot root filesystem.",
+    repoUrl: "https://github.com/Lucacux/OpenWrt-Extroot-Archer-C59v1/tree/main",
+    repoText: "extroot setup on GitHub",
+    body: "16 MiB of flash barely fits the OS. extroot relocates the root filesystem onto a standard USB stick, so packages and system parts live there instead — turning almost no space into ~16 GiB of headroom. The trade-off is honest: the USB is written to constantly and wears over time.",
   },
   {
     year: "2025",

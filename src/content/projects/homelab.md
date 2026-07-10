@@ -1,14 +1,14 @@
 ---
 title: "Self-hosted homelab"
 pitch: "A multi-server homelab built from rescued hardware — evolving from a single Samba share into a hardened, WAN-exposed personal cloud operating behind CGNAT via Cloudflare Tunnel."
-tags: ["Peppermint", "Ubuntu", "Debian", "Arch Linux", "Samba", "Cloudflare Tunnel", "SSH", "Docker", "Jellyfin", "OpenWrt"]
+tags: ["Peppermint", "Ubuntu", "Debian", "Arch Linux", "Samba", "Cloudflare", "SSH", "Docker", "Jellyfin", "OpenWrt"]
 order: 1
 date: "2022 — present"
 thumbnail: "project-1.png"
 skills:
   - "Self-hosting & Linux server administration"
   - "Private networking (static leases, CGNAT, DNS)"
-  - "Securely exposing services to the WAN (Cloudflare Tunnel)"
+  - "Securely exposing services to the WAN — Cloudflare Tunnel, domain & WAF"
   - "SSH hardening (key-only authentication, non-standard ports)"
   - "Containerization with Docker Compose"
   - "Recovering and repurposing legacy hardware"
@@ -25,7 +25,7 @@ The core of the project was never the software itself, but the infrastructure pr
 
 ## From recovered hardware to a NAS
 
-The first machine — a Pentium E5400 with 2 GiB of RAM and a 500 GB HDD — was cleaned, re-pasted, and restored to working condition. After an initial period as a Linux learning environment, it was provisioned as a **NAS running Ubuntu 24.04 LTS**.
+The first machine — a Pentium E5400 with 2 GiB of RAM and a 500 GiB HDD — was cleaned, re-pasted, and restored to working condition. After an initial period as a Linux learning environment, it was provisioned as a **NAS running Ubuntu 24.04 LTS**.
 
 The first milestone was a working **Samba** deployment, configured from scratch over several iterations. It provided network file storage at transfer speeds well beyond the available internet bandwidth, and established a practical understanding of how traffic behaves within a private LAN. A local **Plex** server followed shortly after.
 

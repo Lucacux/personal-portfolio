@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import Icon from "./Icon.astro";
 
 const entries = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 
@@ -21,7 +22,6 @@ const tagLogos: Record<string, string | undefined> = {
   "Debian": imgUrl("debian-original.svg"),
   "Arch Linux": imgUrl("archlinux-original.svg"),
   "Samba": imgUrl("samba-logo.svg"),
-  "Cloudflare Tunnel": imgUrl("Cloudflare_Logo.svg"),
   "SSH": imgUrl("ssh-logo.svg"),
   "Docker": imgUrl("docker-original.svg"),
   "Jellyfin": imgUrl("jellyfin-logo.svg"),
@@ -31,6 +31,21 @@ const tagLogos: Record<string, string | undefined> = {
   "DNS-over-HTTPS": imgUrl("dns.svg"),
   "SQM / CAKE": imgUrl("qos.svg"),
   "zram": imgUrl("ram-memory.svg"),
+  "Cloudflare": imgUrl("Cloudflare_Logo.svg"),
+  "Python": imgUrl("python-original.svg"),
+  "discord.py": imgUrl("discord.svg"),
+  "discord.js": imgUrl("discord.svg"),
+  "Node.js": imgUrl("nodejs-original.svg"),
+  "PostgreSQL": imgUrl("postgresql-original.svg"),
+  "Ansible": imgUrl("ansible-original.svg"),
+  "Dokploy": imgUrl("dokploy.svg"),
+  "Dockerfile": imgUrl("dockerfile.svg"),
+  "Ollama": imgUrl("ollama.svg"),
+};
+// Dark-mode variants for tags whose logo swaps by theme.
+const tagLogosDark: Record<string, string | undefined> = {
+  "Dokploy": imgUrl("dokploy-dark.svg"),
+  "Ollama": imgUrl("ollama-dark.svg"),
 };
 
 // OpenWrt wordmark for the OpenWrt card title (light + dark variants).
@@ -51,8 +66,8 @@ const openwrtLogoDark = imgUrl("OpenWrt_Logo-dark.svg");
       {entries.map((p, i) => (
         <div class="tl-item">
           <div class="tl-marker">{String(i + 1).padStart(2, "0")}</div>
-          <a class="project-card" href={`/projects/${p.id}/`}>
-            <div>
+          <div class="project-card">
+            <a class="pc-body" href={`/projects/${p.id}/`}>
               <h3>{p.id === "openwrt" ? (
                 <span class="title-with-logo">
                   <img class="title-logo logo-light" src={openwrtLogo} alt="OpenWrt" />
@@ -64,18 +79,32 @@ const openwrtLogoDark = imgUrl("OpenWrt_Logo-dark.svg");
               <div class="tag-row">
                 {p.data.tags.map((t) => (
                   <span class="tag">
-                    {tagLogos[t] && <img class="tag-logo" src={tagLogos[t]} alt="" loading="lazy" />}
+                    {tagLogos[t] && (tagLogosDark[t]
+                      ? <>
+                          <img class="tag-logo logo-light" src={tagLogos[t]} alt="" loading="lazy" />
+                          <img class="tag-logo logo-dark" src={tagLogosDark[t]} alt="" loading="lazy" />
+                        </>
+                      : <img class="tag-logo" src={tagLogos[t]} alt="" loading="lazy" />
+                    )}
                     {t}
                   </span>
                 ))}
               </div>
               <span class="project-link">view case study →</span>
-            </div>
-            {thumbUrl(p.data.thumbnail)
-              ? <div class="thumb has-img"><img src={thumbUrl(p.data.thumbnail)} alt={p.data.title} loading="lazy" /></div>
-              : <div class="thumb">photo / screenshot</div>
-            }
-          </a>
+            </a>
+            {p.id === "discord-bots" ? (
+              <a class="thumb thumb-github" href="https://github.com/Lucacux" target="_blank" rel="noopener noreferrer" aria-label="Lucacux on GitHub">
+                <span class="thumb-gh-glow"></span>
+                <span class="thumb-gh-mark"><Icon name="github" /></span>
+                <span class="thumb-gh-text">github.com/Lucacux</span>
+                <span class="thumb-gh-cta">7 bots · view repos →</span>
+              </a>
+            ) : thumbUrl(p.data.thumbnail) ? (
+              <a class="thumb has-img" href={`/projects/${p.id}/`}><img src={thumbUrl(p.data.thumbnail)} alt={p.data.title} loading="lazy" /></a>
+            ) : (
+              <a class="thumb" href={`/projects/${p.id}/`}>photo / screenshot</a>
+            )}
+          </div>
         </div>
       ))}
     </div>
@@ -94,6 +123,9 @@ const openwrtLogoDark = imgUrl("OpenWrt_Logo-dark.svg");
   .project-card .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 14px; }
   .tag { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--accent-soft); padding: 4px 9px; border-radius: 3px; }
   .tag-logo { width: 14px; height: 14px; object-fit: contain; }
+  .tag-logo.logo-dark { display: none; }
+  :global([data-theme="dark"]) .tag-logo.logo-light { display: none; }
+  :global([data-theme="dark"]) .tag-logo.logo-dark { display: inline-block; }
   .project-card h3 { font-size: 19px; font-weight: 600; margin-bottom: 2px; }
   .title-with-logo { display: inline-flex; align-items: center; gap: 9px; flex-wrap: wrap; }
   .title-logo { height: 1.15em; width: auto; display: inline-block; }
@@ -111,6 +143,30 @@ const openwrtLogoDark = imgUrl("OpenWrt_Logo-dark.svg");
   .thumb { width: 100%; height: 150px; background: linear-gradient(135deg, var(--accent-soft), var(--copper-soft)); border-radius: 4px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--text-muted); overflow: hidden; }
   .thumb.has-img { background: none; padding: 0; }
   .thumb.has-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pc-body { display: block; color: inherit; text-decoration: none; }
+  a.thumb { text-decoration: none; }
+  /* GitHub thumbnail for the Discord Bots card (links to the GitHub profile). */
+  .thumb-github {
+    position: relative; flex-direction: column; gap: 7px;
+    background: var(--bg-card); border: 1.5px solid var(--border-strong);
+    color: var(--text); text-decoration: none;
+    transition: border-color .15s ease, box-shadow .2s ease;
+  }
+  .thumb-github:hover { border-color: var(--accent); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+  .thumb-gh-glow {
+    position: absolute; inset: 0; opacity: 0; pointer-events: none;
+    background: radial-gradient(130px 80px at 50% 0%, var(--accent-soft), transparent 70%);
+    transition: opacity .18s ease;
+  }
+  .thumb-github:hover .thumb-gh-glow { opacity: 1; }
+  .thumb-gh-mark { position: relative; z-index: 1; display: inline-flex; }
+  .thumb-gh-mark :global(svg) {
+    width: 38px; height: 38px; color: var(--text);
+    transition: color .18s ease, transform .2s ease;
+  }
+  .thumb-github:hover .thumb-gh-mark :global(svg) { color: var(--accent); transform: scale(1.08); }
+  .thumb-gh-text { position: relative; z-index: 1; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); }
+  .thumb-gh-cta { position: relative; z-index: 1; font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
   @media (max-width: 880px) {
     .project-card { grid-template-columns: 1fr; }
     .thumb { height: 180px; order: -1; }

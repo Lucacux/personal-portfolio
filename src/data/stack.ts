@@ -27,11 +27,12 @@ export const technologies: StackGroup[] = [
     items: [
       { abbr: "LX", name: "Linux", caption: "Primary OS across all environments", logo: "linux-original.svg" },
       { abbr: "SH", name: "Bash", caption: "Shell scripting & task automation", logo: "bash-original.svg" },
-      { abbr: "CF", name: "Cloudflare Tunnel & Cloudflare Domain", caption: "Custom domain + tunnel to expose services past CGNAT", logo: "Cloudflare_Logo.svg" },
+      { abbr: "CF", name: "Cloudflare", caption: "Tunnel, domain & WAF to expose services past CGNAT", logo: "Cloudflare_Logo.svg" },
       { abbr: "JS", name: "Node.js", caption: "Backend services & Discord bots", logo: "nodejs-original.svg" },
       { abbr: "PG", name: "PostgreSQL", caption: "Relational database management", logo: "postgresql-original.svg" },
       { abbr: "DK", name: "Docker", caption: "Container-based deployments", logo: "docker-original.svg" },
       { abbr: "DC", name: "Docker Compose", caption: "Multi-container orchestration via YAML", logo: "logo-docker-compose-text.svg" },
+      { abbr: "DP", name: "Dokploy", caption: "Self-hosted PaaS for container deployments", logo: "dokploy.svg" },
       { abbr: "GI", name: "Git", caption: "Version control & collaboration", logo: "git-original.svg" },
       { abbr: "GH", name: "GitHub", caption: "Repository hosting & CI/CD", logo: "github-original.svg" },
       { abbr: "AN", name: "Ansible", caption: "Configuration management & IaC", logo: "ansible-original.svg" },

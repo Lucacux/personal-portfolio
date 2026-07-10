@@ -3,8 +3,10 @@ import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Nav from "../../components/Nav.astro";
 import Footer from "../../components/Footer.astro";
+import Icon from "../../components/Icon.astro";
 import { homelabTimeline } from "../../data/homelabTimeline.ts";
 import { openwrtTimeline } from "../../data/openwrtTimeline.ts";
+import { discordBots } from "../../data/discordBots.ts";
 
 export async function getStaticPaths() {
   const entries = await getCollection("projects");
@@ -29,7 +31,6 @@ const tagLogos: Record<string, string | undefined> = {
   "Debian": imgUrl("debian-original.svg"),
   "Arch Linux": imgUrl("archlinux-original.svg"),
   "Samba": imgUrl("samba-logo.svg"),
-  "Cloudflare Tunnel": imgUrl("Cloudflare_Logo.svg"),
   "SSH": imgUrl("ssh-logo.svg"),
   "Docker": imgUrl("docker-original.svg"),
   "Jellyfin": imgUrl("jellyfin-logo.svg"),
@@ -39,6 +40,29 @@ const tagLogos: Record<string, string | undefined> = {
   "DNS-over-HTTPS": imgUrl("dns.svg"),
   "SQM / CAKE": imgUrl("qos.svg"),
   "zram": imgUrl("ram-memory.svg"),
+  // Cloudflare suite (Tunnel + domain + WAF), shown tidily as a single tag.
+  "Cloudflare": imgUrl("Cloudflare_Logo.svg"),
+  // Discord bots stack. imgUrl() returns undefined for files not present yet,
+  // so the tag simply shows its label until the SVG is dropped into src/images/.
+  "Python": imgUrl("python-original.svg"),
+  "discord.py": imgUrl("discord.svg"),
+  "discord.js": imgUrl("discord.svg"),
+  "Node.js": imgUrl("nodejs-original.svg"),
+  "PostgreSQL": imgUrl("postgresql-original.svg"),
+  "Ansible": imgUrl("ansible-original.svg"),
+  "Dokploy": imgUrl("dokploy.svg"),
+  "Dockerfile": imgUrl("dockerfile.svg"),
+  "Playwright": imgUrl("playwright.svg"),
+  "Selenium": imgUrl("selenium.svg"),
+  "FFmpeg": imgUrl("ffmpeg.svg"),
+  "systemd": imgUrl("systemd.svg"),
+  "Wake-on-LAN": imgUrl("wol.svg"),
+  "Ollama": imgUrl("ollama.svg"),
+};
+// Dark-mode variants for tags whose logo needs to swap by theme (light/dark).
+const tagLogosDark: Record<string, string | undefined> = {
+  "Dokploy": imgUrl("dokploy-dark.svg"),
+  "Ollama": imgUrl("ollama-dark.svg"),
 };
 
 const all = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
@@ -52,6 +76,9 @@ const timelines: Record<string, typeof homelabTimeline> = {
 };
 const useTimeline = entry.id in timelines;
 const timeline = timelines[entry.id] ?? [];
+
+// The Discord bots project renders as a series of per-bot blocks (title, text, image, tech logos).
+const showBots = entry.id === "discord-bots";
 
 // Cloudflared explainer drawer (roadmap.sh-style) — only on the homelab case study.
 const docModules = import.meta.glob("../../documentacion-cloudflared/*.svg", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
@@ -120,7 +147,13 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
       <div class="tag-row">
         {entry.data.tags.map((t) => (
           <span class="tag">
-            {tagLogos[t] && <img class="tag-logo" src={tagLogos[t]} alt="" loading="lazy" />}
+            {tagLogos[t] && (tagLogosDark[t]
+              ? <>
+                  <img class="tag-logo logo-light" src={tagLogos[t]} alt="" loading="lazy" />
+                  <img class="tag-logo logo-dark" src={tagLogosDark[t]} alt="" loading="lazy" />
+                </>
+              : <img class="tag-logo" src={tagLogos[t]} alt="" loading="lazy" />
+            )}
             {t}
           </span>
         ))}
@@ -173,7 +206,49 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
                 {t.caption && <figcaption>{t.caption}</figcaption>}
               </figure>
             )}
+            {t.repoUrl && (
+              <a class="tline-repo-below" href={t.repoUrl} target="_blank" rel="noopener noreferrer">
+                <Icon name="github" />{t.repoText || "View on GitHub"}
+              </a>
+            )}
           </div>
+        ))}
+      </div>
+    ) : showBots ? (
+      <div class="bots-wrap">
+        {discordBots.map((b) => (
+          <section class="bot-block">
+            <h3 class="bot-title">{b.title}</h3>
+            <div class="bot-grid">
+              <div class="bot-text">
+                <p>{b.body}</p>
+                <div class="tag-row">
+                  {b.tags.map((t) => (
+                    <span class="tag">
+                      {tagLogos[t] && (tagLogosDark[t]
+                        ? <>
+                            <img class="tag-logo logo-light" src={tagLogos[t]} alt="" loading="lazy" />
+                            <img class="tag-logo logo-dark" src={tagLogosDark[t]} alt="" loading="lazy" />
+                          </>
+                        : <img class="tag-logo" src={tagLogos[t]} alt="" loading="lazy" />
+                      )}
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <a class="bot-repo" href={`https://github.com/Lucacux/${b.repo}`} target="_blank" rel="noopener noreferrer" aria-label={`View ${b.repo} on GitHub`}>
+                <span class="bot-repo-glow"></span>
+                <span class="bot-repo-logos">
+                  <span class="bot-repo-mark"><Icon name="github" /></span>
+                  <span class="bot-repo-plus">+</span>
+                  {timelineImg(b.lang) && <img class="bot-repo-lang" src={timelineImg(b.lang)} alt="" loading="lazy" />}
+                </span>
+                <span class="bot-repo-name"><span class="owner">Lucacux/</span>{b.repo}</span>
+                <span class="bot-repo-cta">View on GitHub →</span>
+              </a>
+            </div>
+          </section>
         ))}
       </div>
     ) : (
@@ -461,6 +536,10 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
     background: var(--accent-soft); padding: 5px 11px; border-radius: 4px;
   }
   .tag-logo { width: 18px; height: 18px; object-fit: contain; }
+  /* Theme-swapping tag logos (e.g. Dokploy, Ollama). */
+  .tag-logo.logo-dark { display: none; }
+  :global([data-theme="dark"]) .tag-logo.logo-light { display: none; }
+  :global([data-theme="dark"]) .tag-logo.logo-dark { display: inline-block; }
   .meta-row { display: flex; gap: 18px; font-family: var(--mono); font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
   .meta-row a:hover { color: var(--accent); }
 
@@ -542,6 +621,16 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
   }
   :global(.tline-body a.tline-repo .gh-mark) { width: 15px; height: 15px; flex: 0 0 auto; }
   :global(.tline-body a.tline-repo:hover) { border-bottom-color: var(--accent); }
+  /* Repo link rendered as its own line below the figure. */
+  .tline-repo-below {
+    display: inline-flex; align-items: center; gap: 7px;
+    margin-top: 12px;
+    font-family: var(--mono); font-size: 13px; color: var(--accent);
+    text-decoration: none; border-bottom: 1px solid transparent;
+    transition: border-color .15s ease;
+  }
+  .tline-repo-below :global(svg) { width: 15px; height: 15px; flex: 0 0 auto; }
+  .tline-repo-below:hover { border-bottom-color: var(--accent); }
   .tline-figure { margin: 18px 0 0; }
   .tline-figure img {
     display: block;
@@ -563,6 +652,61 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
     .tline-dot { left: -26px; width: 13px; height: 13px; }
     .tline-title { font-size: 16px; }
     .tline-body { font-size: 14px; }
+  }
+
+  /* Discord bots — per-bot blocks: title, text (+ tech logos) left, image right. */
+  .bots-wrap { padding-bottom: 40px; }
+  .bot-block { padding: 30px 0; border-top: 1px solid var(--border); }
+  .bot-block:first-child { border-top: none; padding-top: 8px; }
+  .bot-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+  .bot-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 28px; align-items: start; }
+  .bot-text p { color: var(--text-muted); font-size: 15px; line-height: 1.7; margin-bottom: 16px; }
+  .bot-text .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* GitHub repo card on the right of each bot — uniform size, github + language logo. */
+  .bot-repo {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; text-align: center;
+    min-height: 200px; padding: 26px 20px;
+    border: 1.5px solid var(--border-strong); border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text); text-decoration: none;
+    overflow: hidden;
+    transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .bot-repo:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .bot-repo-glow {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 1;
+    background: radial-gradient(150px 90px at 50% 0%, var(--accent-soft), transparent 70%);
+    transition: opacity .18s ease;
+  }
+  .bot-repo:hover .bot-repo-glow { opacity: 1; }
+  .bot-repo-logos, .bot-repo-name, .bot-repo-cta { position: relative; z-index: 2; }
+  .bot-repo-logos { display: flex; align-items: center; gap: 12px; }
+  .bot-repo-mark { display: inline-flex; }
+  .bot-repo-mark :global(svg), .bot-repo-lang {
+    width: 40px; height: 40px; object-fit: contain;
+    transition: transform .2s ease, color .18s ease;
+  }
+  .bot-repo-mark :global(svg) { color: var(--text); }
+  /* On hover, both logos move (github scales, language scales the other way + a touch of rotation). */
+  .bot-repo:hover .bot-repo-mark :global(svg) { color: var(--accent); transform: scale(1.1); }
+  .bot-repo:hover .bot-repo-lang { transform: scale(1.1) rotate(-6deg); }
+  .bot-repo-plus { color: var(--text-muted); font-size: 22px; font-weight: 300; line-height: 1; transition: transform .2s ease, color .18s ease; }
+  .bot-repo:hover .bot-repo-plus { transform: rotate(90deg); color: var(--accent); }
+  .bot-repo-name { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+  .bot-repo-name .owner { color: var(--text-muted); font-weight: 400; }
+  .bot-repo-cta { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
+  @media (max-width: 760px) {
+    .bot-grid { grid-template-columns: 1fr; }
+    .bot-repo { min-height: 170px; padding: 22px; }
+  }
+  @media (max-width: 480px) {
+    .bot-block { padding: 22px 0; }
+    .bot-title { font-size: 16px; }
+    .bot-text p { font-size: 14px; }
   }
 
   .prose { padding-bottom: 60px; font-size: 16px; line-height: 1.7; }

@@ -6,6 +6,8 @@ export interface TimelineEntry {
   logo?: string;    // small tech logo shown under the title
   image?: string;   // filename in src/images, optional
   caption?: string; // italic caption under the image
+  repoUrl?: string;  // optional GitHub repo link shown below the image
+  repoText?: string; // label for the repo link
   filled?: boolean; // solid marker (milestone) vs hollow
 }
 
@@ -19,7 +21,7 @@ export const homelabTimeline: TimelineEntry[] = [
     year: "2023",
     title: "First contact with Linux",
     logo: "peppermint-logo.svg",
-    body: "Pressed into service as a daily driver, the Pentium E5400 (2 GiB RAM, 500 GB HDD) ran Peppermint Linux. This was where the fundamentals clicked: the terminal, package repositories, and how distributions and flavors actually differ.",
+    body: "Pressed into service as a daily driver, the Pentium E5400 (2 GiB RAM, 500 GiB HDD) ran Peppermint Linux. This was where the fundamentals clicked: the terminal, package repositories, and how distributions and flavors actually differ.",
   },
   {
     year: "2024",
