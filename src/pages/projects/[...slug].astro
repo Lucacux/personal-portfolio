@@ -106,11 +106,17 @@ const openwrtLogo = imgUrl("OpenWrt_Logo.svg");
 const openwrtLogoDark = imgUrl("OpenWrt_Logo-dark.svg");
 // Rich network-topology diagram, shown prominently on the OpenWrt case study.
 const topologyDiagram = diagramUrl("My-Network-Topology.svg");
+// Full homelab infrastructure diagram, shown prominently on the homelab case study.
+const homelabDiagram = diagramUrl("My-Homelab-Infrastructure.svg");
 // Cloudflare wordmark for the drawer badge (light + dark variants).
 const cfLogo = imgUrl("Cloudflare_Logo.svg");
 const cfLogoDark = imgUrl("Cloudflare_Logo-dark.svg");
 // Router icon for the CGNAT drawer badge.
 const routerIcon = imgUrl("router.svg");
+// server-mbp drawer (homelab): the 2011 MacBook Pro node. Photos guarded — undefined if not present yet.
+const archIcon = imgUrl("archlinux-original.svg");
+const mbpPhoto = imgUrl("server-mbp.png");
+const mbpServices = imgUrl("server-mbp-services.png");
 // Google Docs icon for the resource row.
 const gdocsIcon = imgUrl("Google_Docs_icon_(2026).svg");
 // Downloadable setup guide (served from /public, works in dev and prod). Written in Spanish.
@@ -118,6 +124,13 @@ const cfDocUrl = "/docs/cloudflare-tunnel-ssh-guia.docx";
 function timelineImg(filename?: string) {
   if (!filename) return undefined;
   const match = Object.entries(logoModules).find(([path]) => path.endsWith("/" + filename));
+  return match?.[1];
+}
+// Bot artwork lives in src/imagenes-bots/ (Astro optimizes these at build).
+const botArtModules = import.meta.glob("../../imagenes-bots/*", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+function botArt(filename?: string) {
+  if (!filename) return undefined;
+  const match = Object.entries(botArtModules).find(([path]) => path.endsWith("/" + filename));
   return match?.[1];
 }
 const next = idx < all.length - 1 ? all[idx + 1] : null;
@@ -185,6 +198,13 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
       </figure>
     )}
 
+    {entry.id === "homelab" && homelabDiagram && (
+      <figure class="topology-figure">
+        <img src={homelabDiagram} alt="My homelab infrastructure: servers, the services each one runs, and how everything connects." loading="lazy" />
+        <figcaption>My homelab infrastructure, end to end.</figcaption>
+      </figure>
+    )}
+
     {useTimeline ? (
       <div class="timeline-wrap">
         {timeline.map((t) => (
@@ -218,6 +238,9 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
       <div class="bots-wrap">
         {discordBots.map((b) => (
           <section class="bot-block">
+            {botArt(b.image) && (
+              <div class="bot-banner"><img src={botArt(b.image)} alt={b.title} loading="lazy" /></div>
+            )}
             <h3 class="bot-title">{b.title}</h3>
             <div class="bot-grid">
               <div class="bot-text">
@@ -257,9 +280,11 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
       </article>
     )}
 
-    <nav class={`prev-next ${!next ? "solo" : ""}`}>
+    <nav class={`prev-next ${(!next && !prev) ? "solo" : ""}`}>
       <a class="nav-btn" href="/">← Back to home</a>
-      {next && <a class="nav-btn" href={`/projects/${next.id}/`}>{next.data.title} →</a>}
+      {next
+        ? <a class="nav-btn" href={`/projects/${next.id}/`}>{next.data.title} →</a>
+        : prev && <a class="nav-btn" href={`/projects/${prev.id}/`}>← {prev.data.title}</a>}
     </nav>
     </main>
   </div>
@@ -356,6 +381,52 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
             port-forwarding simply don't work. That's why a home server can't be exposed the classic
             way, and why an <em>outbound</em> tunnel like Cloudflare Tunnel is needed instead.
           </p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="cf-drawer-root" id="drawer-mbp" aria-hidden="true">
+      <div class="cf-backdrop" data-drawer-close></div>
+      <aside class="cf-panel" role="dialog" aria-modal="true" aria-label="The high-agility node — a 2011 MacBook Pro">
+        <header class="cf-panel-head">
+          <span class="cf-badge">
+            {archIcon && <img class="cf-badge-icon" src={archIcon} alt="" />}
+            Homelab node
+          </span>
+          <button class="cf-close" type="button" data-drawer-close aria-label="Close">✕</button>
+        </header>
+        <div class="cf-panel-body">
+          <h2 class="cf-title">The high-agility node</h2>
+          <p class="cf-lead">
+            Nothing exotic — a 13-inch MacBook Pro from 2011, a dual-core i5 with 10 GiB of RAM.
+            It just happens to be the most capable machine in the homelab (everything else is older
+            and slower), so it became the node I lean on when something needs a bit more than the
+            vintage servers can give. macOS is gone; it runs Arch Linux (linux-lts), headless and
+            always on.
+          </p>
+
+          {mbpPhoto && (
+            <figure class="cf-figure cf-photo">
+              <img src={mbpPhoto} alt="The 2011 MacBook Pro running Arch Linux as a homelab node." loading="lazy" />
+              <figcaption>server-mbp — a 2011 MacBook Pro running Arch Linux.</figcaption>
+            </figure>
+          )}
+
+          <h3 class="cf-h3">What it runs</h3>
+          <p>
+            It's the homelab's control node. Ansible runs here to push fleet-wide updates (triggered
+            from a Discord bot), and Dokploy handles CI/CD, building the Dockerfiles for both container
+            and bare-metal deploys. On top of that it hosts Ollama serving Qwen 2.5 (the local model
+            behind Thinky-AI), an offline self-hosted Wikipedia, and a PostgreSQL + Redis stack in
+            Docker Compose for a collaborative database project.
+          </p>
+
+          {mbpServices && (
+            <figure class="cf-figure cf-photo">
+              <img src={mbpServices} alt="Some of the services running on server-mbp." loading="lazy" />
+              <figcaption>Some of the services on server-mbp.</figcaption>
+            </figure>
+          )}
         </div>
       </aside>
     </div>
@@ -659,6 +730,15 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
   .bot-block { padding: 30px 0; border-top: 1px solid var(--border); }
   .bot-block:first-child { border-top: none; padding-top: 8px; }
   .bot-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+  .bot-banner { margin-bottom: 18px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .bot-banner img {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    height: auto;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
   .bot-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 28px; align-items: start; }
   .bot-text p { color: var(--text-muted); font-size: 15px; line-height: 1.7; margin-bottom: 16px; }
   .bot-text .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -707,6 +787,7 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
     .bot-block { padding: 22px 0; }
     .bot-title { font-size: 16px; }
     .bot-text p { font-size: 14px; }
+    .bot-banner img { aspect-ratio: 16 / 9; }
   }
 
   .prose { padding-bottom: 60px; font-size: 16px; line-height: 1.7; }
@@ -847,6 +928,12 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
   .cf-figure figcaption {
     font-size: 12.5px; color: var(--text-muted); font-style: italic;
     margin-top: 8px; text-align: center;
+  }
+  /* Photo variant: no white matte/padding — framed like the timeline photos. */
+  .cf-photo img {
+    background: none; padding: 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   }
   .cf-h3 {
     font-size: 13px; font-family: var(--mono); text-transform: uppercase;

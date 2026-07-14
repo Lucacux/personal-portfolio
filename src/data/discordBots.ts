@@ -9,6 +9,7 @@ export interface DiscordBot {
   tags: string[];
   repo: string;   // repository name under github.com/Lucacux
   lang: string;   // predominant-language logo filename in src/images/
+  image?: string;  // optional artwork filename in src/imagenes-bots/
 }
 
 export const discordBots: DiscordBot[] = [
@@ -20,6 +21,7 @@ export const discordBots: DiscordBot[] = [
     tags: ["Python", "discord.py", "Ollama", "aiohttp"],
     repo: "Thinky-AI",
     lang: "python-original.svg",
+    image: "thinky-bot.png",
   },
   {
     id: "centinela",
@@ -29,6 +31,7 @@ export const discordBots: DiscordBot[] = [
     tags: ["Python", "discord.py", "systemd", "SSH", "psutil"],
     repo: "Centinela-Pentium",
     lang: "python-original.svg",
+    image: "bot-centinela.png",
   },
   {
     id: "isp-uplink-guardian",
@@ -47,6 +50,7 @@ export const discordBots: DiscordBot[] = [
     tags: ["Python", "discord.py", "Ansible", "SSH"],
     repo: "Updates-Bot",
     lang: "python-original.svg",
+    image: "bot-updates.png",
   },
   {
     id: "wol-bot",
@@ -56,6 +60,7 @@ export const discordBots: DiscordBot[] = [
     tags: ["Python", "discord.py", "Wake-on-LAN", "SSH"],
     repo: "WOL-Bot",
     lang: "python-original.svg",
+    image: "bot-wol.png",
   },
   {
     id: "media-bot",
@@ -65,6 +70,7 @@ export const discordBots: DiscordBot[] = [
     tags: ["Python", "discord.py", "yt-dlp", "FFmpeg", "Jellyfin"],
     repo: "Media-Bot",
     lang: "python-original.svg",
+    image: "bot-mediaserver.png",
   },
   {
     id: "gameserver-bot",
@@ -74,5 +80,6 @@ export const discordBots: DiscordBot[] = [
     tags: ["Node.js", "discord.js", "gamedig", "SSH"],
     repo: "GameServer-Bot",
     lang: "nodejs-original.svg",
+    image: "bot-gameserver.png",
   },
 ];
