@@ -113,7 +113,7 @@ const cfLogo = imgUrl("Cloudflare_Logo.svg");
 const cfLogoDark = imgUrl("Cloudflare_Logo-dark.svg");
 // Router icon for the CGNAT drawer badge.
 const routerIcon = imgUrl("router.svg");
-// server-mbp drawer (homelab): the 2011 MacBook Pro node. Photos guarded — undefined if not present yet.
+// server-mbp drawer (homelab): the 2012 MacBook Pro node. Photos guarded — undefined if not present yet.
 const archIcon = imgUrl("archlinux-original.svg");
 const mbpPhoto = imgUrl("server-mbp.png");
 const mbpServices = imgUrl("server-mbp-services.png");
@@ -387,7 +387,7 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
 
     <div class="cf-drawer-root" id="drawer-mbp" aria-hidden="true">
       <div class="cf-backdrop" data-drawer-close></div>
-      <aside class="cf-panel" role="dialog" aria-modal="true" aria-label="The high-agility node — a 2011 MacBook Pro">
+      <aside class="cf-panel" role="dialog" aria-modal="true" aria-label="The high-agility node — a 2012 MacBook Pro">
         <header class="cf-panel-head">
           <span class="cf-badge">
             {archIcon && <img class="cf-badge-icon" src={archIcon} alt="" />}
@@ -398,7 +398,7 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
         <div class="cf-panel-body">
           <h2 class="cf-title">The high-agility node</h2>
           <p class="cf-lead">
-            Nothing exotic — a 13-inch MacBook Pro from 2011, a dual-core i5 with 10 GiB of RAM.
+            Nothing exotic — a 13-inch MacBook Pro from 2012, a dual-core i5 with 10 GiB of RAM.
             It just happens to be the most capable machine in the homelab (everything else is older
             and slower), so it became the node I lean on when something needs a bit more than the
             vintage servers can give. macOS is gone; it runs Arch Linux (linux-lts), headless and
@@ -407,8 +407,8 @@ const next = idx < all.length - 1 ? all[idx + 1] : null;
 
           {mbpPhoto && (
             <figure class="cf-figure cf-photo">
-              <img src={mbpPhoto} alt="The 2011 MacBook Pro running Arch Linux as a homelab node." loading="lazy" />
-              <figcaption>server-mbp — a 2011 MacBook Pro running Arch Linux.</figcaption>
+              <img src={mbpPhoto} alt="The 2012 MacBook Pro running Arch Linux as a homelab node." loading="lazy" />
+              <figcaption>server-mbp — a 2012 MacBook Pro running Arch Linux.</figcaption>
             </figure>
           )}
 
