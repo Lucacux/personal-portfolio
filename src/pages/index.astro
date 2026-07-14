@@ -19,4 +19,39 @@ import Footer from "../components/Footer.astro";
     <Certifications />
   </main>
   <Footer />
+
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top" title="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+  </button>
 </BaseLayout>
+
+<style>
+  .back-to-top {
+    position: fixed; right: 24px; bottom: 24px; z-index: 50;
+    width: 44px; height: 44px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--bg-card); color: var(--text);
+    border: 1px solid var(--border-strong); cursor: pointer;
+    opacity: 0; visibility: hidden; transform: translateY(10px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s ease, border-color .15s ease, color .15s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+  .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
+  .back-to-top:hover { color: var(--accent); border-color: var(--accent); }
+  .back-to-top svg { width: 20px; height: 20px; }
+  @media (max-width: 560px) { .back-to-top { right: 16px; bottom: 16px; } }
+</style>
+
+<script>
+  const btn = document.getElementById("back-to-top");
+  if (btn) {
+    const onScroll = () => {
+      // Show once the user has scrolled past the first screen.
+      if (window.scrollY > window.innerHeight * 0.6) btn.classList.add("show");
+      else btn.classList.remove("show");
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  }
+</script>
