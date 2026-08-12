@@ -26,6 +26,7 @@ export const technologies: StackGroup[] = [
     group: "Infrastructure & Tools",
     items: [
       { abbr: "LX", name: "Linux", caption: "Primary OS across all environments", logo: "linux-original.svg" },
+      { abbr: "RH", name: "RHEL", caption: "Red Hat Enterprise Linux administration", logo: "redhat-icon.svg" },
       { abbr: "SH", name: "Bash", caption: "Shell scripting & task automation", logo: "bash-original.svg" },
       { abbr: "CF", name: "Cloudflare", caption: "Tunnel, domain & WAF to expose services past CGNAT", logo: "Cloudflare_Logo.svg" },
       { abbr: "JS", name: "Node.js", caption: "Backend services & Discord bots", logo: "nodejs-original.svg" },

@@ -56,6 +56,13 @@ export const certifications: CertCategory[] = [
     category: "Networking & Systems",
     items: [
       {
+        name: "Fundamentals of Red Hat Enterprise Linux",
+        issuer: "Red Hat",
+        issuerAbbr: "RH",
+        logo: "redhat-icon.svg",
+        link: "https://www.coursera.org/account/accomplishments/verify/HWOL7UDCHPXR",
+      },
+      {
         name: "Networking Basics",
         issuer: "Cisco",
         issuerAbbr: "CI",
